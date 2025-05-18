@@ -10,6 +10,7 @@ import Dashboard from "./pages/Dashboard";
 import CRM from "./pages/CRM";
 import RFPs from "./pages/RFPs";
 import Proposals from "./pages/Proposals";
+import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -26,6 +27,7 @@ const App = () => (
           <Route path="/crm" element={<Layout><CRM /></Layout>} />
           <Route path="/rfps" element={<Layout><RFPs /></Layout>} />
           <Route path="/proposals" element={<Layout><Proposals /></Layout>} />
+          <Route path="/settings" element={<Layout><Settings /></Layout>} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
