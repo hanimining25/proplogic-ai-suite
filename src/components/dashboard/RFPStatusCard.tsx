@@ -1,6 +1,6 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
+import { CustomProgress } from "@/components/ui/custom-progress";
 import { cn } from "@/lib/utils";
 
 interface RFPStatusCardProps {
@@ -39,11 +39,10 @@ const RFPStatusCard = ({ title, total, items, className }: RFPStatusCardProps) =
                   </span>
                 </div>
               </div>
-              <Progress 
+              <CustomProgress 
                 value={(item.value / total) * 100} 
                 className="h-2"
-                indicatorClassName={cn("transition-all")}
-                style={{ backgroundColor: item.color }}
+                indicatorColor={item.color}
               />
             </div>
           ))}
