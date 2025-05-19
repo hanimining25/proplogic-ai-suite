@@ -2,14 +2,17 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
 import {
-  Bell,
-  ChevronDown,
-  FileText,
-  FolderOpen,
-  Home,
   LayoutDashboard,
-  Settings,
   Users,
+  FileText,
+  FilePen,
+  Archive,
+  ChartBar,
+  FileText as Document,
+  Bell,
+  Bot,
+  Settings,
+  HelpCircle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -42,12 +45,6 @@ const Sidebar = ({ isCollapsed, toggleSidebar }: SidebarProps) => {
       <nav className="py-4">
         <ul className="space-y-1 px-2">
           <SidebarLink
-            to="/"
-            icon={<Home size={20} />}
-            text="Home"
-            isCollapsed={isCollapsed}
-          />
-          <SidebarLink
             to="/dashboard"
             icon={<LayoutDashboard size={20} />}
             text="Dashboard"
@@ -56,7 +53,7 @@ const Sidebar = ({ isCollapsed, toggleSidebar }: SidebarProps) => {
           <SidebarLink
             to="/crm"
             icon={<Users size={20} />}
-            text="CRM"
+            text="Clients & CRM"
             isCollapsed={isCollapsed}
           />
           <SidebarLink
@@ -67,8 +64,38 @@ const Sidebar = ({ isCollapsed, toggleSidebar }: SidebarProps) => {
           />
           <SidebarLink
             to="/proposals"
-            icon={<FolderOpen size={20} />}
-            text="Proposals"
+            icon={<FilePen size={20} />}
+            text="Proposal Builder"
+            isCollapsed={isCollapsed}
+          />
+          <SidebarLink
+            to="/archive"
+            icon={<Archive size={20} />}
+            text="Archive"
+            isCollapsed={isCollapsed}
+          />
+          <SidebarLink
+            to="/reports"
+            icon={<ChartBar size={20} />}
+            text="Reports & Insights"
+            isCollapsed={isCollapsed}
+          />
+          <SidebarLink
+            to="/documents"
+            icon={<Document size={20} />}
+            text="Documents & Templates"
+            isCollapsed={isCollapsed}
+          />
+          <SidebarLink
+            to="/notifications"
+            icon={<Bell size={20} />}
+            text="Notifications & Approvals"
+            isCollapsed={isCollapsed}
+          />
+          <SidebarLink
+            to="/ai-admin"
+            icon={<Bot size={20} />}
+            text="AI Admin Console"
             isCollapsed={isCollapsed}
           />
         </ul>
@@ -83,9 +110,9 @@ const Sidebar = ({ isCollapsed, toggleSidebar }: SidebarProps) => {
             isCollapsed={isCollapsed}
           />
           <SidebarLink
-            to="/notifications"
-            icon={<Bell size={20} />}
-            text="Notifications"
+            to="/help"
+            icon={<HelpCircle size={20} />}
+            text="Feedback & Help"
             isCollapsed={isCollapsed}
           />
         </ul>

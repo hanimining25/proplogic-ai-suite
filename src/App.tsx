@@ -27,6 +27,12 @@ const App = () => (
           <Route path="/crm" element={<Layout><CRM /></Layout>} />
           <Route path="/rfps" element={<Layout><RFPs /></Layout>} />
           <Route path="/proposals" element={<Layout><Proposals /></Layout>} />
+          <Route path="/archive" element={<Layout><NotFound /></Layout>} />
+          <Route path="/reports" element={<Layout><NotFound /></Layout>} />
+          <Route path="/documents" element={<Layout><NotFound /></Layout>} />
+          <Route path="/notifications" element={<Layout><NotFound /></Layout>} />
+          <Route path="/ai-admin" element={<Layout><NotFound /></Layout>} />
+          <Route path="/help" element={<Layout><NotFound /></Layout>} />
           <Route path="/settings" element={<Layout><Settings /></Layout>} />
           <Route path="*" element={<NotFound />} />
         </Routes>
