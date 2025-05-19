@@ -1,69 +1,126 @@
+import React from "react";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { useNavigate, useLocation } from "react-router-dom";
+import { ProfileTab } from "@/components/settings/ProfileTab";
+import { NotificationsTab } from "@/components/settings/NotificationsTab";
+import { AppearanceTab } from "@/components/settings/AppearanceTab";
+import { SecurityTab } from "@/components/settings/SecurityTab";
 
-import React, { useState } from "react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { User, BellRing, Globe, Shield } from "lucide-react";
-
-import ProfileTab from "@/components/settings/ProfileTab";
-import NotificationsTab from "@/components/settings/NotificationsTab";
-import AppearanceTab from "@/components/settings/AppearanceTab";
-import SecurityTab from "@/components/settings/SecurityTab";
+// Settings tabs configuration
+const settingsTabs = [
+  { value: "profile", label: "Company Settings", path: "/settings/company" },
+  { value: "users", label: "User Roles & Permissions", path: "/settings/users" },
+  { value: "email", label: "Email Templates & Workflows", path: "/settings/email" },
+  { value: "localization", label: "Localization", path: "/settings/localization" },
+  { value: "integrations", label: "API Integrations", path: "/settings/integrations" },
+  { value: "security", label: "Security & Audit Logs", path: "/settings/security" },
+  { value: "billing", label: "Subscription & Billing", path: "/settings/billing" },
+  { value: "legal", label: "Legal & Compliance", path: "/settings/legal" },
+];
 
 const Settings = () => {
-  // Initial profile data
-  const profileData = {
-    name: "John Doe",
-    email: "john.doe@proplogic.ai",
-    position: "Proposal Manager",
-    bio: "Experienced proposal writer with 10+ years in the industry."
+  const navigate = useNavigate();
+  const location = useLocation();
+  const currentPath = location.pathname;
+  
+  // Determine active tab based on current path
+  const getActiveTab = () => {
+    const activeTab = settingsTabs.find(tab => tab.path === currentPath);
+    return activeTab ? activeTab.value : "profile";
+  };
+  
+  const handleTabChange = (value: string) => {
+    const tab = settingsTabs.find(tab => tab.value === value);
+    if (tab) {
+      navigate(tab.path);
+    }
   };
 
   return (
-    <div className="container mx-auto p-6 max-w-7xl">
-      <div className="flex flex-col space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold">Settings</h1>
-          <p className="text-muted-foreground">
-            Manage your account settings and preferences
-          </p>
-        </div>
-
-        <Tabs defaultValue="profile" className="w-full">
-          <TabsList className="grid grid-cols-4 mb-8">
-            <TabsTrigger value="profile" className="flex items-center gap-2">
-              <User size={16} />
-              <span className="hidden sm:inline">Profile</span>
-            </TabsTrigger>
-            <TabsTrigger value="notifications" className="flex items-center gap-2">
-              <BellRing size={16} />
-              <span className="hidden sm:inline">Notifications</span>
-            </TabsTrigger>
-            <TabsTrigger value="appearance" className="flex items-center gap-2">
-              <Globe size={16} />
-              <span className="hidden sm:inline">Appearance</span>
-            </TabsTrigger>
-            <TabsTrigger value="security" className="flex items-center gap-2">
-              <Shield size={16} />
-              <span className="hidden sm:inline">Security</span>
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="profile" className="space-y-6">
-            <ProfileTab initialData={profileData} />
-          </TabsContent>
-
-          <TabsContent value="notifications" className="space-y-6">
-            <NotificationsTab />
-          </TabsContent>
-
-          <TabsContent value="appearance" className="space-y-6">
-            <AppearanceTab />
-          </TabsContent>
-
-          <TabsContent value="security" className="space-y-6">
-            <SecurityTab />
-          </TabsContent>
-        </Tabs>
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-3xl font-bold tracking-tight">Settings</h2>
+        <p className="text-muted-foreground">
+          Platform, user, tenant, and integration configurations.
+        </p>
       </div>
+
+      <Tabs value={getActiveTab()} onValueChange={handleTabChange} className="w-full">
+        <TabsList className="w-full overflow-x-auto flex flex-nowrap">
+          {settingsTabs.map((tab) => (
+            <TabsTrigger key={tab.value} value={tab.value} className="whitespace-nowrap">
+              {tab.label}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+        
+        <div className="mt-6">
+          {currentPath === "/settings/company" && (
+            <TabsContent value="profile" className="space-y-6">
+              <ProfileTab />
+            </TabsContent>
+          )}
+          {currentPath === "/settings/security" && (
+            <TabsContent value="security" className="space-y-6">
+              <SecurityTab />
+            </TabsContent>
+          )}
+          {currentPath === "/settings/users" && (
+            <TabsContent value="users" className="space-y-6">
+              <div>
+                <h3 className="text-xl font-semibold mb-4">User Roles & Permissions</h3>
+                <p>Manage user roles and permissions settings.</p>
+                {/* Add user management content here */}
+              </div>
+            </TabsContent>
+          )}
+          {currentPath === "/settings/email" && (
+            <TabsContent value="email" className="space-y-6">
+              <div>
+                <h3 className="text-xl font-semibold mb-4">Email Templates & Workflows</h3>
+                <p>Configure email templates and workflows.</p>
+                {/* Add email settings content here */}
+              </div>
+            </TabsContent>
+          )}
+          {currentPath === "/settings/localization" && (
+            <TabsContent value="localization" className="space-y-6">
+              <div>
+                <h3 className="text-xl font-semibold mb-4">Localization</h3>
+                <p>Manage localization settings.</p>
+                {/* Add localization settings content here */}
+              </div>
+            </TabsContent>
+          )}
+          {currentPath === "/settings/integrations" && (
+            <TabsContent value="integrations" className="space-y-6">
+              <div>
+                <h3 className="text-xl font-semibold mb-4">API Integrations</h3>
+                <p>Configure API integrations.</p>
+                {/* Add integrations settings content here */}
+              </div>
+            </TabsContent>
+          )}
+          {currentPath === "/settings/billing" && (
+            <TabsContent value="billing" className="space-y-6">
+              <div>
+                <h3 className="text-xl font-semibold mb-4">Subscription & Billing</h3>
+                <p>Manage subscription and billing settings.</p>
+                {/* Add billing settings content here */}
+              </div>
+            </TabsContent>
+          )}
+          {currentPath === "/settings/legal" && (
+            <TabsContent value="legal" className="space-y-6">
+              <div>
+                <h3 className="text-xl font-semibold mb-4">Legal & Compliance</h3>
+                <p>Manage legal and compliance settings.</p>
+                {/* Add legal settings content here */}
+              </div>
+            </TabsContent>
+          )}
+        </div>
+      </Tabs>
     </div>
   );
 };

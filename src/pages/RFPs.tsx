@@ -1,145 +1,69 @@
 
 import React from "react";
-import { 
-  Button,
-  Card, 
-  CardContent, 
-  CardHeader, 
-  CardTitle,
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger
-} from "@/components/ui";
-import { FileText, Plus, Upload } from "lucide-react";
-import RecentRFPsTable from "@/components/dashboard/RecentRFPsTable";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { useNavigate, useLocation } from "react-router-dom";
+
+// RFPs tabs configuration
+const rfpTabs = [
+  { value: "overview", label: "Discover RFPs", path: "/rfps" },
+  { value: "uploaded", label: "Uploaded RFPs", path: "/rfps/uploaded" },
+  { value: "relevance", label: "AI Relevance Score", path: "/rfps/relevance" },
+  { value: "details", label: "RFP Details & SoW", path: "/rfps/details" },
+  { value: "documents", label: "Supporting Documents", path: "/rfps/documents" },
+  { value: "risk", label: "Risk/Compliance Summary", path: "/rfps/risk" },
+  { value: "rules", label: "Classification Rules", path: "/rfps/rules" },
+  { value: "builder", label: "RFP Draft Builder", path: "/rfps/builder" },
+];
 
 const RFPs = () => {
-  // Sample data - reusing the same structure as in Dashboard
-  const allRFPs = [
-    {
-      id: "1",
-      title: "IT Infrastructure Upgrade",
-      client: "Ministry of Education",
-      deadline: "May 25, 2025",
-      status: "In Progress" as const,
-      relevance: 85,
-      value: "$450,000",
-    },
-    {
-      id: "2",
-      title: "Digital Transformation",
-      client: "Saudi Telecom",
-      deadline: "Jun 10, 2025",
-      status: "Reviewing" as const,
-      relevance: 72,
-      value: "$1,200,000",
-    },
-    {
-      id: "3",
-      title: "ERP Implementation",
-      client: "SABIC",
-      deadline: "Jun 5, 2025",
-      status: "New" as const,
-      relevance: 93,
-      value: "$780,000",
-    },
-    {
-      id: "4",
-      title: "Cloud Migration Services",
-      client: "Saudi Aramco",
-      deadline: "May 15, 2025",
-      status: "Submitted" as const,
-      relevance: 88,
-      value: "$950,000",
-    },
-    {
-      id: "5",
-      title: "Cybersecurity Assessment",
-      client: "Saudi Airlines",
-      deadline: "Apr 30, 2025",
-      status: "Won" as const,
-      relevance: 75,
-      value: "$320,000",
-    },
-    {
-      id: "6",
-      title: "Data Center Consolidation",
-      client: "NEOM",
-      deadline: "Jun 20, 2025",
-      status: "New" as const,
-      relevance: 91,
-      value: "$2,300,000",
-    },
-    {
-      id: "7",
-      title: "Network Security Audit",
-      client: "Saudi National Bank",
-      deadline: "May 28, 2025",
-      status: "Reviewing" as const,
-      relevance: 65,
-      value: "$180,000",
-    },
-    {
-      id: "8",
-      title: "AI Strategy Development",
-      client: "Saudi Aramco",
-      deadline: "Jul 15, 2025",
-      status: "New" as const,
-      relevance: 88,
-      value: "$550,000",
+  const navigate = useNavigate();
+  const location = useLocation();
+  const currentPath = location.pathname;
+  
+  // Determine active tab based on current path
+  const getActiveTab = () => {
+    const activeTab = rfpTabs.find(tab => tab.path === currentPath);
+    return activeTab ? activeTab.value : "overview";
+  };
+  
+  const handleTabChange = (value: string) => {
+    const tab = rfpTabs.find(tab => tab.value === value);
+    if (tab) {
+      navigate(tab.path);
     }
-  ];
-
-  const newRFPs = allRFPs.filter(rfp => rfp.status === "New");
-  const activeRFPs = allRFPs.filter(rfp => ["In Progress", "Reviewing"].includes(rfp.status));
-  const submittedRFPs = allRFPs.filter(rfp => ["Submitted", "Won", "Lost"].includes(rfp.status));
+  };
 
   return (
     <div className="space-y-6">
-      <div className="relative">
-        <h1 className="text-3xl font-bold mb-6">RFP Management</h1>
-        <div className="spotlight animate-spotlight bg-primary/20" />
+      <div>
+        <h2 className="text-3xl font-bold tracking-tight">RFPs</h2>
+        <p className="text-muted-foreground">
+          RFP discovery, ingestion & analysis.
+        </p>
       </div>
 
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div className="flex flex-col sm:flex-row gap-3">
-          <Button>
-            <FileText className="mr-2 h-4 w-4" /> Create New RFP
-          </Button>
-          <Button variant="outline">
-            <Upload className="mr-2 h-4 w-4" /> Import from Etimad
-          </Button>
+      <Tabs value={getActiveTab()} onValueChange={handleTabChange} className="w-full">
+        <TabsList className="w-full overflow-x-auto flex flex-nowrap">
+          {rfpTabs.map((tab) => (
+            <TabsTrigger key={tab.value} value={tab.value} className="whitespace-nowrap">
+              {tab.label}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+        
+        <div className="mt-6">
+          {currentPath === "/rfps" && (
+            <div>
+              <h3 className="text-xl font-semibold mb-4">Discover RFPs</h3>
+              <div className="grid gap-4">
+                <p>Find and discover new RFP opportunities.</p>
+                {/* Original RFPs content */}
+              </div>
+            </div>
+          )}
+          {/* The other tab content will be shown through routing */}
         </div>
-      </div>
-
-      <Card className="animate-fade-in">
-        <CardHeader>
-          <CardTitle>RFPs</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Tabs defaultValue="all" className="w-full">
-            <TabsList className="mb-6">
-              <TabsTrigger value="all">All RFPs</TabsTrigger>
-              <TabsTrigger value="new">New</TabsTrigger>
-              <TabsTrigger value="active">Active</TabsTrigger>
-              <TabsTrigger value="submitted">Submitted</TabsTrigger>
-            </TabsList>
-            <TabsContent value="all">
-              <RecentRFPsTable rfps={allRFPs} />
-            </TabsContent>
-            <TabsContent value="new">
-              <RecentRFPsTable rfps={newRFPs} />
-            </TabsContent>
-            <TabsContent value="active">
-              <RecentRFPsTable rfps={activeRFPs} />
-            </TabsContent>
-            <TabsContent value="submitted">
-              <RecentRFPsTable rfps={submittedRFPs} />
-            </TabsContent>
-          </Tabs>
-        </CardContent>
-      </Card>
+      </Tabs>
     </div>
   );
 };
