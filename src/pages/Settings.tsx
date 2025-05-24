@@ -1,10 +1,10 @@
 import React from "react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useNavigate, useLocation } from "react-router-dom";
-import { ProfileTab } from "@/components/settings/ProfileTab";
-import { NotificationsTab } from "@/components/settings/NotificationsTab";
-import { AppearanceTab } from "@/components/settings/AppearanceTab";
-import { SecurityTab } from "@/components/settings/SecurityTab";
+import ProfileTab from "@/components/settings/ProfileTab";
+import NotificationsTab from "@/components/settings/NotificationsTab";
+import AppearanceTab from "@/components/settings/AppearanceTab";
+import SecurityTab from "@/components/settings/SecurityTab";
 
 // Settings tabs configuration
 const settingsTabs = [
