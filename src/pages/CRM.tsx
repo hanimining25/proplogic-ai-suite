@@ -2,6 +2,13 @@
 import React from "react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useNavigate, useLocation } from "react-router-dom";
+import AllClientsTab from "../components/crm/AllClientsTab";
+import ContactsTab from "../components/crm/ContactsTab";
+import EngagementTimelineTab from "../components/crm/EngagementTimelineTab";
+import ClientHealthTab from "../components/crm/ClientHealthTab";
+import ActivityLogTab from "../components/crm/ActivityLogTab";
+import OpportunitiesTab from "../components/crm/OpportunitiesTab";
+import ClientInsightsTab from "../components/crm/ClientInsightsTab";
 
 // CRM tabs configuration
 const crmTabs = [
@@ -32,12 +39,33 @@ const CRM = () => {
     }
   };
 
+  const renderTabContent = () => {
+    switch (currentPath) {
+      case "/crm":
+        return <AllClientsTab />;
+      case "/crm/contacts":
+        return <ContactsTab />;
+      case "/crm/timeline":
+        return <EngagementTimelineTab />;
+      case "/crm/health":
+        return <ClientHealthTab />;
+      case "/crm/activity":
+        return <ActivityLogTab />;
+      case "/crm/opportunities":
+        return <OpportunitiesTab />;
+      case "/crm/insights":
+        return <ClientInsightsTab />;
+      default:
+        return <AllClientsTab />;
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div>
         <h2 className="text-3xl font-bold tracking-tight">Clients & CRM</h2>
         <p className="text-muted-foreground">
-          Manage your clients and relationships.
+          Manage your clients, track relationships, and monitor business opportunities.
         </p>
       </div>
 
@@ -51,17 +79,7 @@ const CRM = () => {
         </TabsList>
         
         <div className="mt-6">
-          {currentPath === "/crm" && (
-            <div>
-              <h3 className="text-xl font-semibold mb-4">All Clients</h3>
-              {/* Original CRM content */}
-              <div className="grid gap-4">
-                <p>Client management dashboard and overview.</p>
-                {/* Add client list or other content here */}
-              </div>
-            </div>
-          )}
-          {/* The other tab content will be shown through routing */}
+          {renderTabContent()}
         </div>
       </Tabs>
     </div>

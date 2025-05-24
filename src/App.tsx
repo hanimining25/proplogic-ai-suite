@@ -36,15 +36,15 @@ const App: React.FC = () => {
               <Route path="/dashboard/ai-suggestions" element={<Layout><Dashboard /></Layout>} />
               <Route path="/dashboard/assistant" element={<Layout><Dashboard /></Layout>} />
               
-              {/* CRM routes */}
+              {/* CRM routes - all handled within CRM component */}
               <Route path="/crm" element={<Layout><CRM /></Layout>} />
-              <Route path="/crm/clients" element={<Layout><NotFound /></Layout>} />
-              <Route path="/crm/contacts" element={<Layout><NotFound /></Layout>} />
-              <Route path="/crm/timeline" element={<Layout><NotFound /></Layout>} />
-              <Route path="/crm/health" element={<Layout><NotFound /></Layout>} />
-              <Route path="/crm/activity" element={<Layout><NotFound /></Layout>} />
-              <Route path="/crm/opportunities" element={<Layout><NotFound /></Layout>} />
-              <Route path="/crm/insights" element={<Layout><NotFound /></Layout>} />
+              <Route path="/crm/clients" element={<Layout><CRM /></Layout>} />
+              <Route path="/crm/contacts" element={<Layout><CRM /></Layout>} />
+              <Route path="/crm/timeline" element={<Layout><CRM /></Layout>} />
+              <Route path="/crm/health" element={<Layout><CRM /></Layout>} />
+              <Route path="/crm/activity" element={<Layout><CRM /></Layout>} />
+              <Route path="/crm/opportunities" element={<Layout><CRM /></Layout>} />
+              <Route path="/crm/insights" element={<Layout><CRM /></Layout>} />
               
               {/* RFPs routes */}
               <Route path="/rfps" element={<Layout><RFPs /></Layout>} />
