@@ -24,15 +24,15 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           
-          {/* Dashboard routes */}
+          {/* Dashboard routes - all handled within Dashboard component */}
           <Route path="/dashboard" element={<Layout><Dashboard /></Layout>} />
-          <Route path="/dashboard/executive-summary" element={<Layout><NotFound /></Layout>} />
-          <Route path="/dashboard/pipeline" element={<Layout><NotFound /></Layout>} />
-          <Route path="/dashboard/recent-activity" element={<Layout><NotFound /></Layout>} />
-          <Route path="/dashboard/win-loss" element={<Layout><NotFound /></Layout>} />
-          <Route path="/dashboard/deadlines" element={<Layout><NotFound /></Layout>} />
-          <Route path="/dashboard/ai-suggestions" element={<Layout><NotFound /></Layout>} />
-          <Route path="/dashboard/assistant" element={<Layout><NotFound /></Layout>} />
+          <Route path="/dashboard/executive-summary" element={<Layout><Dashboard /></Layout>} />
+          <Route path="/dashboard/pipeline" element={<Layout><Dashboard /></Layout>} />
+          <Route path="/dashboard/recent-activity" element={<Layout><Dashboard /></Layout>} />
+          <Route path="/dashboard/win-loss" element={<Layout><Dashboard /></Layout>} />
+          <Route path="/dashboard/deadlines" element={<Layout><Dashboard /></Layout>} />
+          <Route path="/dashboard/ai-suggestions" element={<Layout><Dashboard /></Layout>} />
+          <Route path="/dashboard/assistant" element={<Layout><Dashboard /></Layout>} />
           
           {/* CRM routes */}
           <Route path="/crm" element={<Layout><CRM /></Layout>} />
@@ -119,14 +119,14 @@ const App = () => (
           
           {/* Settings routes */}
           <Route path="/settings" element={<Layout><Settings /></Layout>} />
-          <Route path="/settings/company" element={<Layout><NotFound /></Layout>} />
-          <Route path="/settings/users" element={<Layout><NotFound /></Layout>} />
-          <Route path="/settings/email" element={<Layout><NotFound /></Layout>} />
-          <Route path="/settings/localization" element={<Layout><NotFound /></Layout>} />
-          <Route path="/settings/integrations" element={<Layout><NotFound /></Layout>} />
-          <Route path="/settings/security" element={<Layout><NotFound /></Layout>} />
-          <Route path="/settings/billing" element={<Layout><NotFound /></Layout>} />
-          <Route path="/settings/legal" element={<Layout><NotFound /></Layout>} />
+          <Route path="/settings/company" element={<Layout><Settings /></Layout>} />
+          <Route path="/settings/users" element={<Layout><Settings /></Layout>} />
+          <Route path="/settings/email" element={<Layout><Settings /></Layout>} />
+          <Route path="/settings/localization" element={<Layout><Settings /></Layout>} />
+          <Route path="/settings/integrations" element={<Layout><Settings /></Layout>} />
+          <Route path="/settings/security" element={<Layout><Settings /></Layout>} />
+          <Route path="/settings/billing" element={<Layout><Settings /></Layout>} />
+          <Route path="/settings/legal" element={<Layout><Settings /></Layout>} />
           
           {/* Help routes */}
           <Route path="/help" element={<Layout><NotFound /></Layout>} />

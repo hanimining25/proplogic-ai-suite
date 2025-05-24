@@ -1,7 +1,15 @@
+
 import React from "react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import OverviewTab from "@/components/dashboard/OverviewTab";
+import ExecutiveSummaryTab from "@/components/dashboard/ExecutiveSummaryTab";
+import PipelineOverviewTab from "@/components/dashboard/PipelineOverviewTab";
+import RecentActivityTab from "@/components/dashboard/RecentActivityTab";
+import WinLossTrendsTab from "@/components/dashboard/WinLossTrendsTab";
+import UpcomingDeadlinesTab from "@/components/dashboard/UpcomingDeadlinesTab";
+import AISuggestionsTab from "@/components/dashboard/AISuggestionsTab";
+import QuickAccessAssistantTab from "@/components/dashboard/QuickAccessAssistantTab";
 
 // Dashboard tabs configuration
 const dashboardTabs = [
@@ -52,44 +60,14 @@ const Dashboard = () => {
         </TabsList>
         
         <div className="mt-6">
-          {currentPath === "/dashboard" && (
-            <div>
-              <h3 className="text-xl font-semibold mb-4">Overview & Strategic Intelligence</h3>
-              {/* Original Dashboard content */}
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Total Proposals</CardTitle>
-                    <CardDescription>Number of proposals created</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold">125</div>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle>RFP Conversion Rate</CardTitle>
-                    <CardDescription>Conversion rate from RFP to Proposal</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold">67%</div>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Average Proposal Value</CardTitle>
-                    <CardDescription>Average value of submitted proposals</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold">$50,000</div>
-                  </CardContent>
-                </Card>
-              </div>
-            </div>
-          )}
-          {/* The other tab content will be shown through routing */}
+          {currentPath === "/dashboard" && <OverviewTab />}
+          {currentPath === "/dashboard/executive-summary" && <ExecutiveSummaryTab />}
+          {currentPath === "/dashboard/pipeline" && <PipelineOverviewTab />}
+          {currentPath === "/dashboard/recent-activity" && <RecentActivityTab />}
+          {currentPath === "/dashboard/win-loss" && <WinLossTrendsTab />}
+          {currentPath === "/dashboard/deadlines" && <UpcomingDeadlinesTab />}
+          {currentPath === "/dashboard/ai-suggestions" && <AISuggestionsTab />}
+          {currentPath === "/dashboard/assistant" && <QuickAccessAssistantTab />}
         </div>
       </Tabs>
     </div>
