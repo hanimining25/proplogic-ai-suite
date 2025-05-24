@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -36,6 +37,14 @@ const Settings = () => {
     }
   };
 
+  // Default profile data for the ProfileTab component
+  const defaultProfileData = {
+    name: "John Doe",
+    email: "john.doe@company.com",
+    position: "Senior Manager",
+    bio: "Experienced professional with expertise in proposal management and business development."
+  };
+
   return (
     <div className="space-y-6">
       <div>
@@ -57,7 +66,7 @@ const Settings = () => {
         <div className="mt-6">
           {currentPath === "/settings/company" && (
             <TabsContent value="profile" className="space-y-6">
-              <ProfileTab />
+              <ProfileTab initialData={defaultProfileData} />
             </TabsContent>
           )}
           {currentPath === "/settings/security" && (
