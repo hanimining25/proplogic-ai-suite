@@ -1,16 +1,40 @@
-
-import React from 'react';
+import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
-import { getRfpById } from '@/data/rfps';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { getRfpById, deleteRfp, updateRfpStatus } from '@/data/rfps';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { AlertTriangle, ArrowLeft, Calendar, FileText, User, Tag, CheckCircle, XCircle } from 'lucide-react';
+import { AlertTriangle, ArrowLeft, Calendar, FileText, User, Tag, CheckCircle, XCircle, MoreVertical, Edit, Trash2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+  DropdownMenuSub,
+  DropdownMenuSubTrigger,
+  DropdownMenuSubContent,
+  DropdownMenuPortal,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+} from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { toast } from 'sonner';
 
 const statusDetails: { [key: string]: { icon: React.ElementType, color: string, label: string } } = {
   new: { icon: Tag, color: 'bg-blue-500', label: 'New' },
@@ -21,6 +45,8 @@ const statusDetails: { [key: string]: { icon: React.ElementType, color: string, 
   archived: { icon: FileText, color: 'bg-gray-500', label: 'Archived' },
 };
 
+const statuses = ['new', 'in_progress', 'submitted', 'won', 'lost', 'archived'];
+
 const capitalize = (s: string) => {
     if (!s) return '';
     return s.charAt(0).toUpperCase() + s.slice(1).replace(/_/g, ' ');
@@ -29,12 +55,42 @@ const capitalize = (s: string) => {
 const RFPDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   const { data: rfp, isLoading, isError, error } = useQuery({
     queryKey: ['rfp', id],
     queryFn: () => getRfpById(id!),
     enabled: !!id,
   });
+
+  const deleteMutation = useMutation({
+    mutationFn: deleteRfp,
+    onSuccess: () => {
+      toast.success(`RFP has been deleted.`);
+      queryClient.invalidateQueries({ queryKey: ['rfps'] });
+      navigate('/rfps');
+    },
+  });
+
+  const updateStatusMutation = useMutation({
+    mutationFn: updateRfpStatus,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['rfp', id] });
+      queryClient.invalidateQueries({ queryKey: ['rfps'] });
+    },
+  });
+
+  const handleDelete = () => {
+    if (!id) return;
+    deleteMutation.mutate(id);
+  };
+
+  const handleStatusChange = (status: string) => {
+    if (id && status !== rfp?.status) {
+      updateStatusMutation.mutate({ id, status });
+    }
+  };
 
   if (isLoading) {
     return (
@@ -82,6 +138,42 @@ const RFPDetailPage = () => {
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back to RFPs
         </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon">
+              <MoreVertical className="h-4 w-4" />
+              <span className="sr-only">RFP Actions</span>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+            <DropdownMenuItem disabled>
+              <Edit className="mr-2 h-4 w-4" />
+              Edit
+            </DropdownMenuItem>
+            <DropdownMenuSub>
+              <DropdownMenuSubTrigger>
+                <span>Change Status</span>
+              </DropdownMenuSubTrigger>
+              <DropdownMenuPortal>
+                <DropdownMenuSubContent>
+                  <DropdownMenuRadioGroup value={rfp.status} onValueChange={handleStatusChange}>
+                    {statuses.map(status => (
+                      <DropdownMenuRadioItem key={status} value={status}>
+                        {capitalize(status)}
+                      </DropdownMenuRadioItem>
+                    ))}
+                  </DropdownMenuRadioGroup>
+                </DropdownMenuSubContent>
+              </DropdownMenuPortal>
+            </DropdownMenuSub>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem className="text-red-600 focus:text-red-600 focus:bg-red-50" onClick={() => setIsDeleteDialogOpen(true)}>
+              <Trash2 className="mr-2 h-4 w-4" />
+              Delete
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
       
       <div>
@@ -179,6 +271,27 @@ const RFPDetailPage = () => {
                 </CardContent>
             </Card>
         )}
+      
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the RFP "{rfp.title}".
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={handleDelete} 
+              disabled={deleteMutation.isPending}
+            >
+              {deleteMutation.isPending ? 'Deleting...' : 'Delete'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

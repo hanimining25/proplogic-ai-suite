@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
@@ -6,6 +5,7 @@ import { cn } from '@/lib/utils';
 import { Tables } from '@/integrations/supabase/types';
 import { format } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
+import { RFPTableRowActions } from './RFPTableRowActions';
 
 type RFP = Tables<'rfps'>;
 
@@ -43,7 +43,8 @@ export const RFPsTable = ({ rfps }: RFPsTableProps) => {
             <TableHead>Client</TableHead>
             <TableHead className="hidden md:table-cell">Deadline</TableHead>
             <TableHead>Status</TableHead>
-            <TableHead className="hidden md:table-cell">Relevance</TableHead>
+            <TableHead>Relevance</TableHead>
+            <TableHead className="text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -88,11 +89,14 @@ export const RFPsTable = ({ rfps }: RFPsTableProps) => {
                     'N/A'
                   )}
                 </TableCell>
+                <TableCell onClick={(e) => e.stopPropagation()} className="text-right">
+                  <RFPTableRowActions rfp={rfp} />
+                </TableCell>
               </TableRow>
             ))
           ) : (
             <TableRow>
-              <TableCell colSpan={5} className="h-24 text-center">
+              <TableCell colSpan={6} className="h-24 text-center">
                 No RFPs found.
               </TableCell>
             </TableRow>

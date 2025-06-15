@@ -90,3 +90,35 @@ export const getRfpById = async (id: string) => {
 
   return data;
 };
+
+export const deleteRfp = async (id: string) => {
+  const { error } = await supabase.from('rfps').delete().eq('id', id);
+
+  if (error) {
+    console.error(`Error deleting RFP with id ${id}:`, error);
+    toast.error("Failed to delete RFP", { description: error.message });
+    throw error;
+  }
+  
+  // No success toast here, it will be handled in the component
+  // to provide better context to the user.
+  return { success: true };
+};
+
+export const updateRfpStatus = async ({ id, status }: { id: string, status: string }) => {
+  const { data, error } = await supabase
+    .from('rfps')
+    .update({ status })
+    .eq('id', id)
+    .select()
+    .single();
+
+  if (error) {
+    console.error(`Error updating RFP status for id ${id}:`, error);
+    toast.error("Failed to update RFP status", { description: error.message });
+    throw error;
+  }
+  
+  toast.success("RFP status updated successfully.");
+  return data;
+};
