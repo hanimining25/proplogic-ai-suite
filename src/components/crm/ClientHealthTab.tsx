@@ -1,23 +1,18 @@
-
 import React from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { TrendingUp, TrendingDown, AlertTriangle, CheckCircle, Users, DollarSign } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { mockClientHealth, mockClients } from '@/data/mockCRMData';
+import { getClientHealthData, ClientHealthWithClientName } from '@/data/clientHealth';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 const ClientHealthTab = () => {
-  const healthData = mockClientHealth.map(health => ({
-    ...health,
-    clientName: mockClients.find(c => c.id === health.clientId)?.name || 'Unknown'
-  }));
-
-  const overallStats = {
-    avgHealth: Math.round(healthData.reduce((sum, h) => sum + h.overallScore, 0) / healthData.length),
-    highRisk: healthData.filter(h => h.riskLevel === 'high').length,
-    mediumRisk: healthData.filter(h => h.riskLevel === 'medium').length,
-    lowRisk: healthData.filter(h => h.riskLevel === 'low').length
-  };
+  const { data: healthData, isLoading, isError, error } = useQuery<ClientHealthWithClientName[]>({
+    queryKey: ['clientHealth'],
+    queryFn: getClientHealthData,
+  });
 
   const getRiskColor = (riskLevel: string) => {
     switch (riskLevel) {
@@ -38,6 +33,48 @@ const ClientHealthTab = () => {
     if (score >= 80) return <TrendingUp className="h-4 w-4 text-green-600" />;
     if (score >= 60) return <TrendingUp className="h-4 w-4 text-yellow-600" />;
     return <TrendingDown className="h-4 w-4 text-red-600" />;
+  };
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-24" />)}
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <Skeleton className="h-[450px]" />
+          <Skeleton className="h-[450px]" />
+        </div>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <Alert variant="destructive">
+        <AlertTriangle className="h-4 w-4" />
+        <AlertTitle>Error fetching client health data</AlertTitle>
+        <AlertDescription>{error?.message}</AlertDescription>
+      </Alert>
+    );
+  }
+  
+  if (!healthData || healthData.length === 0) {
+    return (
+      <Card>
+        <CardContent className="p-6 text-center text-muted-foreground">
+          <h3 className="text-lg font-semibold">No Client Health Data Found</h3>
+          <p>Client health scores will be calculated and displayed here as data becomes available.</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  const overallStats = {
+    avgHealth: healthData.length > 0 ? Math.round(healthData.reduce((sum, h) => sum + h.overallScore, 0) / healthData.length) : 0,
+    highRisk: healthData.filter(h => h.riskLevel === 'high').length,
+    mediumRisk: healthData.filter(h => h.riskLevel === 'medium').length,
+    lowRisk: healthData.filter(h => h.riskLevel === 'low').length
   };
 
   return (
