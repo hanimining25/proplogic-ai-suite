@@ -25,7 +25,8 @@ const ClientCard: React.FC<ClientCardProps> = ({ client }) => {
     return 'text-red-600';
   };
 
-  const formatRevenue = (revenue: number) => {
+  const formatRevenue = (revenue: number | null) => {
+    if (revenue === null || revenue === undefined) return 'N/A';
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',
@@ -34,12 +35,13 @@ const ClientCard: React.FC<ClientCardProps> = ({ client }) => {
     }).format(revenue);
   };
 
-  const formatDate = (date: Date) => {
+  const formatDate = (dateString: string | null) => {
+    if (!dateString) return 'No contact yet';
     return new Intl.DateTimeFormat('en-US', {
       month: 'short',
       day: 'numeric',
       year: 'numeric'
-    }).format(date);
+    }).format(new Date(dateString));
   };
 
   return (
@@ -52,7 +54,7 @@ const ClientCard: React.FC<ClientCardProps> = ({ client }) => {
             </div>
             <div>
               <h3 className="font-semibold text-lg leading-none">{client.name}</h3>
-              <p className="text-sm text-muted-foreground mt-1">{client.industry}</p>
+              <p className="text-sm text-muted-foreground mt-1">{client.industry || 'N/A'}</p>
             </div>
           </div>
           <Badge className={getStatusColor(client.status)}>
@@ -65,22 +67,22 @@ const ClientCard: React.FC<ClientCardProps> = ({ client }) => {
         <div className="grid grid-cols-2 gap-3 text-sm">
           <div className="flex items-center space-x-2">
             <DollarSign className="h-4 w-4 text-muted-foreground" />
-            <span>{formatRevenue(client.revenue)}</span>
+            <span>{formatRevenue(client.annual_revenue)}</span>
           </div>
           <div className="flex items-center space-x-2">
             <Users className="h-4 w-4 text-muted-foreground" />
-            <span>{client.employees} employees</span>
+            <span>{client.employee_count ? `${client.employee_count} employees` : 'N/A'}</span>
           </div>
         </div>
 
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <span className="text-sm text-muted-foreground">Health Score:</span>
-            <span className={`font-semibold ${getHealthScoreColor(client.healthScore)}`}>
-              {client.healthScore}%
+            <span className={`font-semibold ${getHealthScoreColor(client.health_score)}`}>
+              {client.health_score}%
             </span>
           </div>
-          {client.healthScore >= 80 ? (
+          {client.health_score >= 80 ? (
             <TrendingUp className="h-4 w-4 text-green-600" />
           ) : (
             <TrendingDown className="h-4 w-4 text-red-600" />
@@ -89,22 +91,24 @@ const ClientCard: React.FC<ClientCardProps> = ({ client }) => {
 
         <div className="pt-2 border-t">
           <div className="flex items-center justify-between text-xs text-muted-foreground">
-            <span>Last contact: {formatDate(client.lastContact)}</span>
+            <span>Last contact: {formatDate(client.last_contact_date)}</span>
             {client.website && (
-              <Globe className="h-3 w-3" />
+              <a href={client.website} target="_blank" rel="noopener noreferrer" className="hover:text-primary">
+                <Globe className="h-3 w-3" />
+              </a>
             )}
           </div>
         </div>
 
         <div className="flex flex-wrap gap-1">
-          {client.tags.slice(0, 3).map((tag) => (
+          {client.tags?.slice(0, 3).map((tag) => (
             <Badge key={tag} variant="outline" className="text-xs">
               {tag}
             </Badge>
           ))}
-          {client.tags.length > 3 && (
+          {(client.tags?.length ?? 0) > 3 && (
             <Badge variant="outline" className="text-xs">
-              +{client.tags.length - 3}
+              +{(client.tags?.length ?? 0) - 3}
             </Badge>
           )}
         </div>

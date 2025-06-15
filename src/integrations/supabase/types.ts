@@ -9,6 +9,202 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      client_activities: {
+        Row: {
+          client_id: string
+          contact_id: string | null
+          created_at: string
+          date: string
+          description: string | null
+          id: string
+          next_steps: string | null
+          outcome: string | null
+          tags: string[] | null
+          team_member: string | null
+          title: string
+          type: Database["public"]["Enums"]["activity_type"]
+          updated_at: string
+        }
+        Insert: {
+          client_id: string
+          contact_id?: string | null
+          created_at?: string
+          date: string
+          description?: string | null
+          id?: string
+          next_steps?: string | null
+          outcome?: string | null
+          tags?: string[] | null
+          team_member?: string | null
+          title: string
+          type: Database["public"]["Enums"]["activity_type"]
+          updated_at?: string
+        }
+        Update: {
+          client_id?: string
+          contact_id?: string | null
+          created_at?: string
+          date?: string
+          description?: string | null
+          id?: string
+          next_steps?: string | null
+          outcome?: string | null
+          tags?: string[] | null
+          team_member?: string | null
+          title?: string
+          type?: Database["public"]["Enums"]["activity_type"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_activities_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_activities_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      clients: {
+        Row: {
+          annual_revenue: number | null
+          created_at: string
+          description: string | null
+          employee_count: number | null
+          health_score: number
+          id: string
+          industry: string | null
+          last_contact_date: string | null
+          location: string | null
+          logo_url: string | null
+          name: string
+          org_id: string
+          status: Database["public"]["Enums"]["client_status"]
+          tags: string[] | null
+          updated_at: string
+          website: string | null
+        }
+        Insert: {
+          annual_revenue?: number | null
+          created_at?: string
+          description?: string | null
+          employee_count?: number | null
+          health_score?: number
+          id?: string
+          industry?: string | null
+          last_contact_date?: string | null
+          location?: string | null
+          logo_url?: string | null
+          name: string
+          org_id: string
+          status?: Database["public"]["Enums"]["client_status"]
+          tags?: string[] | null
+          updated_at?: string
+          website?: string | null
+        }
+        Update: {
+          annual_revenue?: number | null
+          created_at?: string
+          description?: string | null
+          employee_count?: number | null
+          health_score?: number
+          id?: string
+          industry?: string | null
+          last_contact_date?: string | null
+          location?: string | null
+          logo_url?: string | null
+          name?: string
+          org_id?: string
+          status?: Database["public"]["Enums"]["client_status"]
+          tags?: string[] | null
+          updated_at?: string
+          website?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "clients_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      contacts: {
+        Row: {
+          client_id: string
+          communication_preference:
+            | Database["public"]["Enums"]["comm_preference"]
+            | null
+          created_at: string
+          department: string | null
+          email: string | null
+          first_name: string
+          id: string
+          last_contact_date: string | null
+          last_name: string
+          linkedin_url: string | null
+          notes: string | null
+          phone: string | null
+          role: Database["public"]["Enums"]["contact_role"]
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          client_id: string
+          communication_preference?:
+            | Database["public"]["Enums"]["comm_preference"]
+            | null
+          created_at?: string
+          department?: string | null
+          email?: string | null
+          first_name: string
+          id?: string
+          last_contact_date?: string | null
+          last_name: string
+          linkedin_url?: string | null
+          notes?: string | null
+          phone?: string | null
+          role?: Database["public"]["Enums"]["contact_role"]
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          client_id?: string
+          communication_preference?:
+            | Database["public"]["Enums"]["comm_preference"]
+            | null
+          created_at?: string
+          department?: string | null
+          email?: string | null
+          first_name?: string
+          id?: string
+          last_contact_date?: string | null
+          last_name?: string
+          linkedin_url?: string | null
+          notes?: string | null
+          phone?: string | null
+          role?: Database["public"]["Enums"]["contact_role"]
+          title?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contacts_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       members: {
         Row: {
           created_at: string
@@ -44,6 +240,62 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      opportunities: {
+        Row: {
+          client_id: string
+          created_at: string
+          description: string | null
+          expected_close_date: string | null
+          id: string
+          notes: string | null
+          probability: number | null
+          stage: Database["public"]["Enums"]["opportunity_stage"]
+          tags: string[] | null
+          team_member: string | null
+          title: string
+          updated_at: string
+          value: number | null
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          description?: string | null
+          expected_close_date?: string | null
+          id?: string
+          notes?: string | null
+          probability?: number | null
+          stage: Database["public"]["Enums"]["opportunity_stage"]
+          tags?: string[] | null
+          team_member?: string | null
+          title: string
+          updated_at?: string
+          value?: number | null
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          description?: string | null
+          expected_close_date?: string | null
+          id?: string
+          notes?: string | null
+          probability?: number | null
+          stage?: Database["public"]["Enums"]["opportunity_stage"]
+          tags?: string[] | null
+          team_member?: string | null
+          title?: string
+          updated_at?: string
+          value?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "opportunities_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
             referencedColumns: ["id"]
           },
         ]
@@ -92,6 +344,7 @@ export type Database = {
       }
       rfps: {
         Row: {
+          client_id: string | null
           client_name: string | null
           created_at: string
           document_url: string | null
@@ -105,6 +358,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          client_id?: string | null
           client_name?: string | null
           created_at?: string
           document_url?: string | null
@@ -118,6 +372,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          client_id?: string | null
           client_name?: string | null
           created_at?: string
           document_url?: string | null
@@ -131,6 +386,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "rfps_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "rfps_org_id_fkey"
             columns: ["org_id"]
@@ -155,6 +417,13 @@ export type Database = {
       }
     }
     Enums: {
+      activity_type:
+        | "meeting"
+        | "call"
+        | "email"
+        | "proposal"
+        | "contract"
+        | "note"
       app_role:
         | "admin"
         | "commercial"
@@ -162,6 +431,15 @@ export type Database = {
         | "crm_manager"
         | "finance"
         | "executive"
+      client_status: "active" | "inactive" | "prospect"
+      comm_preference: "email" | "phone" | "linkedin" | "in-person"
+      contact_role: "primary" | "secondary" | "stakeholder"
+      opportunity_stage:
+        | "discovery"
+        | "proposal"
+        | "negotiation"
+        | "closed-won"
+        | "closed-lost"
       rfp_status:
         | "new"
         | "in_progress"
@@ -284,6 +562,14 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      activity_type: [
+        "meeting",
+        "call",
+        "email",
+        "proposal",
+        "contract",
+        "note",
+      ],
       app_role: [
         "admin",
         "commercial",
@@ -291,6 +577,16 @@ export const Constants = {
         "crm_manager",
         "finance",
         "executive",
+      ],
+      client_status: ["active", "inactive", "prospect"],
+      comm_preference: ["email", "phone", "linkedin", "in-person"],
+      contact_role: ["primary", "secondary", "stakeholder"],
+      opportunity_stage: [
+        "discovery",
+        "proposal",
+        "negotiation",
+        "closed-won",
+        "closed-lost",
       ],
       rfp_status: [
         "new",

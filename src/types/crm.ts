@@ -1,51 +1,12 @@
+import { Tables } from '@/integrations/supabase/types';
 
-export interface Client {
-  id: string;
-  name: string;
-  industry: string;
-  website?: string;
-  logo?: string;
-  status: 'active' | 'inactive' | 'prospect';
-  healthScore: number;
-  revenue: number;
-  employees: number;
-  location: string;
-  createdAt: Date;
-  lastContact: Date;
-  primaryContact: string;
-  tags: string[];
-  description?: string;
-}
+export type Client = Tables<'clients'>;
+export type Contact = Tables<'contacts'>;
+export type ClientActivity = Tables<'client_activities'>;
+export type Opportunity = Tables<'opportunities'>;
 
-export interface Contact {
-  id: string;
-  clientId: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone?: string;
-  title: string;
-  department: string;
-  role: 'primary' | 'secondary' | 'stakeholder';
-  linkedIn?: string;
-  lastContact: Date;
-  communicationPreference: 'email' | 'phone' | 'linkedin' | 'in-person';
-  notes?: string;
-}
-
-export interface ClientActivity {
-  id: string;
-  clientId: string;
-  type: 'meeting' | 'call' | 'email' | 'proposal' | 'contract' | 'note';
-  title: string;
-  description: string;
-  date: Date;
-  teamMember: string;
-  contactId?: string;
-  outcome?: string;
-  nextSteps?: string;
-  tags: string[];
-}
+// The interfaces below are for aggregated data views and don't map directly to a single table.
+// We will keep them for now and adjust as needed when implementing those features.
 
 export interface ClientHealth {
   clientId: string;
@@ -61,22 +22,6 @@ export interface ClientHealth {
     impact: 'positive' | 'negative' | 'neutral';
   }[];
   recommendations: string[];
-}
-
-export interface Opportunity {
-  id: string;
-  clientId: string;
-  title: string;
-  description: string;
-  value: number;
-  stage: 'discovery' | 'proposal' | 'negotiation' | 'closed-won' | 'closed-lost';
-  probability: number;
-  expectedCloseDate: Date;
-  createdAt: Date;
-  lastUpdated: Date;
-  teamMember: string;
-  tags: string[];
-  notes?: string;
 }
 
 export interface ClientInsight {

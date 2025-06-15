@@ -1,31 +1,66 @@
 
 import React, { useState } from 'react';
-import { Search, Filter, Plus, Download } from 'lucide-react';
+import { Search, Plus, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { mockClients } from '@/data/mockCRMData';
+import { Card, CardContent } from '@/components/ui/card';
 import ClientCard from './ClientCard';
+import { useQuery } from '@tanstack/react-query';
+import { getClients } from '@/data/clients';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { AlertTriangle } from 'lucide-react';
 
 const AllClientsTab = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<string>('all');
+  
+  const { data: clients = [], isLoading, isError, error } = useQuery({
+    queryKey: ['clients'],
+    queryFn: getClients,
+  });
 
-  const filteredClients = mockClients.filter(client => {
+  const filteredClients = clients.filter(client => {
     const matchesSearch = client.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         client.industry.toLowerCase().includes(searchTerm.toLowerCase());
+                         (client.industry && client.industry.toLowerCase().includes(searchTerm.toLowerCase()));
     const matchesFilter = filterStatus === 'all' || client.status === filterStatus;
     return matchesSearch && matchesFilter;
   });
 
   const stats = {
-    total: mockClients.length,
-    active: mockClients.filter(c => c.status === 'active').length,
-    prospects: mockClients.filter(c => c.status === 'prospect').length,
-    inactive: mockClients.filter(c => c.status === 'inactive').length,
-    avgHealth: Math.round(mockClients.reduce((sum, c) => sum + c.healthScore, 0) / mockClients.length)
+    total: clients.length,
+    active: clients.filter(c => c.status === 'active').length,
+    prospects: clients.filter(c => c.status === 'prospect').length,
+    inactive: clients.filter(c => c.status === 'inactive').length,
+    avgHealth: clients.length > 0 ? Math.round(clients.reduce((sum, c) => sum + c.health_score, 0) / clients.length) : 0,
   };
+  
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+          {[...Array(5)].map((_, i) => <Skeleton key={i} className="h-[76px]" />)}
+        </div>
+        <div className="flex flex-col sm:flex-row gap-4 justify-between py-4">
+          <Skeleton className="h-10 w-full max-w-md" />
+          <Skeleton className="h-10 w-32" />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {[...Array(6)].map((_, i) => <Skeleton key={i} className="h-[280px]" />)}
+        </div>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <Alert variant="destructive">
+        <AlertTriangle className="h-4 w-4" />
+        <AlertTitle>Error Loading Clients</AlertTitle>
+        <AlertDescription>{error.message}</AlertDescription>
+      </Alert>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -82,7 +117,7 @@ const AllClientsTab = () => {
           >
             <option value="all">All Status</option>
             <option value="active">Active</option>
-            <option value="prospect">Prospects</option>
+            <option value="prospect">Prospect</option>
             <option value="inactive">Inactive</option>
           </select>
         </div>
@@ -105,9 +140,9 @@ const AllClientsTab = () => {
         ))}
       </div>
 
-      {filteredClients.length === 0 && (
-        <div className="text-center py-12">
-          <p className="text-muted-foreground">No clients found matching your search criteria.</p>
+      {filteredClients.length === 0 && !isLoading && (
+        <div className="text-center py-12 col-span-full">
+          <p className="text-muted-foreground">No clients found. Try adjusting your search or filters, or add a new client.</p>
         </div>
       )}
     </div>
