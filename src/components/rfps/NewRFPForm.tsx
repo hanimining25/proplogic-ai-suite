@@ -1,5 +1,5 @@
 
-import { useForm } from 'react-hook-form';
+import { useForm, SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -42,9 +42,9 @@ export const NewRFPForm = () => {
     },
   });
 
-  function onSubmit(values: NewRFPFormValues) {
-    mutation.mutate(values);
-  }
+  const onSubmit: SubmitHandler<NewRFPFormValues> = (data) => {
+    mutation.mutate(data);
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
