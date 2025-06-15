@@ -16,7 +16,8 @@ export const mockClients: Client[] = [
     tags: ['enterprise', 'tech', 'saas'],
     description: 'Leading software development company specializing in enterprise solutions.',
     logo_url: null,
-    org_id: 'd1b2c3a4-e5f6-a7b8-c9d0-e1f2a3b4c5d6'
+    org_id: 'd1b2c3a4-e5f6-a7b8-c9d0-e1f2a3b4c5d6',
+    updated_at: new Date('2024-05-20').toISOString(),
   },
   {
     id: '2',
@@ -33,7 +34,8 @@ export const mockClients: Client[] = [
     tags: ['manufacturing', 'industrial', 'large-enterprise'],
     description: 'Major manufacturing company with operations worldwide.',
     logo_url: null,
-    org_id: 'd1b2c3a4-e5f6-a7b8-c9d0-e1f2a3b4c5d6'
+    org_id: 'd1b2c3a4-e5f6-a7b8-c9d0-e1f2a3b4c5d6',
+    updated_at: new Date('2024-05-18').toISOString(),
   },
   {
     id: '3',
@@ -50,7 +52,8 @@ export const mockClients: Client[] = [
     tags: ['finance', 'mid-market', 'prospect'],
     description: 'Growing financial services firm focused on small business lending.',
     logo_url: null,
-    org_id: 'd1b2c3a4-e5f6-a7b8-c9d0-e1f2a3b4c5d6'
+    org_id: 'd1b2c3a4-e5f6-a7b8-c9d0-e1f2a3b4c5d6',
+    updated_at: new Date('2024-05-15').toISOString(),
   },
   {
     id: '4',
@@ -67,7 +70,8 @@ export const mockClients: Client[] = [
     tags: ['healthcare', 'innovation', 'growing'],
     description: 'Healthcare technology company developing innovative patient care solutions.',
     logo_url: null,
-    org_id: 'd1b2c3a4-e5f6-a7b8-c9d0-e1f2a3b4c5d6'
+    org_id: 'd1b2c3a4-e5f6-a7b8-c9d0-e1f2a3b4c5d6',
+    updated_at: new Date('2024-05-22').toISOString(),
   },
   {
     id: '5',
@@ -84,7 +88,8 @@ export const mockClients: Client[] = [
     tags: ['education', 'small-business', 'at-risk'],
     description: 'Educational software company serving K-12 schools.',
     logo_url: null,
-    org_id: 'd1b2c3a4-e5f6-a7b8-c9d0-e1f2a3b4c5d6'
+    org_id: 'd1b2c3a4-e5f6-a7b8-c9d0-e1f2a3b4c5d6',
+    updated_at: new Date('2024-02-10').toISOString(),
   }
 ];
 

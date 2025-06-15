@@ -4,8 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ActivityWithDetails } from '@/data/activities';
 
-type ActivityForTimeline = Omit<ActivityWithDetails, 'date'> & { 
-  date: Date; 
+type ActivityForTimeline = ActivityWithDetails & { 
   clientName: string; 
   contactName: string | null;
 };
@@ -40,14 +39,14 @@ const TimelineItem: React.FC<TimelineItemProps> = ({ activity, isLast }) => {
     }
   };
 
-  const formatDate = (date: Date) => {
+  const formatDate = (dateString: string) => {
     return new Intl.DateTimeFormat('en-US', {
       month: 'short',
       day: 'numeric',
       year: 'numeric',
       hour: '2-digit',
       minute: '2-digit'
-    }).format(date);
+    }).format(new Date(dateString));
   };
 
   const getTypeColor = (type: string) => {

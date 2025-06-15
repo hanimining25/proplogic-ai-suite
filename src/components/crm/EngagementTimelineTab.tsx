@@ -28,8 +28,8 @@ const EngagementTimelineTab = () => {
   const activitiesWithDetails = activities.map(activity => {
     const clientName = activity.clients?.name || 'Unknown';
     const contactName = activity.contacts ? `${activity.contacts.first_name} ${activity.contacts.last_name}` : null;
-    return { ...activity, clientName, contactName, date: new Date(activity.date) };
-  }).sort((a, b) => b.date.getTime() - a.date.getTime());
+    return { ...activity, clientName, contactName };
+  }).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
   const filteredActivities = activitiesWithDetails.filter(activity => {
     const matchesSearch = 

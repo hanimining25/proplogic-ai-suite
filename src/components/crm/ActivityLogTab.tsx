@@ -14,6 +14,7 @@ const ActivityLogTab = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState<string>('all');
   const [sortBy, setSortBy] = useState<string>('date');
+  const activityTypes = ['meeting', 'call', 'email', 'proposal', 'contract', 'note'];
 
   const { data: activities = [], isLoading, isError, error } = useQuery({
     queryKey: ['clientActivities'],
@@ -198,8 +199,6 @@ const ActivityLogTab = () => {
       </Alert>
     );
   }
-
-  const activityTypes = ['meeting', 'call', 'email', 'proposal', 'contract', 'note'];
 
   return (
     <div className="space-y-6">
