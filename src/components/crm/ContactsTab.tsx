@@ -1,28 +1,31 @@
-
 import React, { useState } from 'react';
-import { Search, Phone, Mail, User, Building, Plus } from 'lucide-react';
+import { Search, Phone, Mail, User, Building, Plus, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { mockContacts, mockClients } from '@/data/mockCRMData';
+import { useQuery } from '@tanstack/react-query';
+import { getContacts, ContactWithClient } from '@/data/contacts';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 const ContactsTab = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterRole, setFilterRole] = useState<string>('all');
+  
+  const { data: contacts = [], isLoading, isError, error } = useQuery({
+    queryKey: ['contacts'],
+    queryFn: getContacts,
+  });
 
-  const contactsWithClients = mockContacts.map(contact => ({
-    ...contact,
-    clientName: mockClients.find(c => c.id === contact.clientId)?.name || 'Unknown'
-  }));
-
-  const filteredContacts = contactsWithClients.filter(contact => {
+  const filteredContacts = contacts.filter((contact: ContactWithClient) => {
+    const clientName = contact.clients?.name || '';
     const matchesSearch = 
-      contact.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      contact.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      contact.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      contact.clientName.toLowerCase().includes(searchTerm.toLowerCase());
+      contact.first_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      contact.last_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (contact.email && contact.email.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      clientName.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesFilter = filterRole === 'all' || contact.role === filterRole;
     return matchesSearch && matchesFilter;
   });
@@ -36,19 +39,40 @@ const ContactsTab = () => {
     }
   };
 
-  const formatDate = (date: Date) => {
+  const formatDate = (dateString: string | null) => {
+    if (!dateString) return 'N/A';
     return new Intl.DateTimeFormat('en-US', {
       month: 'short',
       day: 'numeric',
       year: 'numeric'
-    }).format(date);
+    }).format(new Date(dateString));
   };
 
   const stats = {
-    total: mockContacts.length,
-    primary: mockContacts.filter(c => c.role === 'primary').length,
-    stakeholders: mockContacts.filter(c => c.role === 'stakeholder').length
+    total: contacts.length,
+    primary: contacts.filter(c => c.role === 'primary').length,
+    stakeholders: contacts.filter(c => c.role === 'stakeholder').length
   };
+
+  if (isLoading) {
+    return <div className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {[...Array(3)].map((_, i) => <Skeleton key={i} className="h-[76px]" />)}
+      </div>
+      <Skeleton className="h-10 w-full" />
+      <Skeleton className="h-[400px] w-full" />
+    </div>;
+  }
+
+  if (isError) {
+    return (
+      <Alert variant="destructive">
+        <AlertTriangle className="h-4 w-4" />
+        <AlertTitle>Error Loading Contacts</AlertTitle>
+        <AlertDescription>{error.message}</AlertDescription>
+      </Alert>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -126,7 +150,7 @@ const ContactsTab = () => {
                       <User className="h-4 w-4 text-primary" />
                     </div>
                     <div>
-                      <div className="font-medium">{contact.firstName} {contact.lastName}</div>
+                      <div className="font-medium">{contact.first_name} {contact.last_name}</div>
                       <div className="text-sm text-muted-foreground">{contact.title}</div>
                     </div>
                   </div>
@@ -134,7 +158,7 @@ const ContactsTab = () => {
                 <TableCell>
                   <div className="flex items-center space-x-2">
                     <Building className="h-4 w-4 text-muted-foreground" />
-                    <span>{contact.clientName}</span>
+                    <span>{contact.clients?.name || 'Unknown'}</span>
                   </div>
                 </TableCell>
                 <TableCell>
@@ -145,12 +169,12 @@ const ContactsTab = () => {
                 <TableCell>{contact.department}</TableCell>
                 <TableCell>
                   <div className="flex items-center space-x-2">
-                    {contact.communicationPreference === 'email' && <Mail className="h-4 w-4" />}
-                    {contact.communicationPreference === 'phone' && <Phone className="h-4 w-4" />}
+                    {contact.communication_preference === 'email' && <Mail className="h-4 w-4" />}
+                    {contact.communication_preference === 'phone' && <Phone className="h-4 w-4" />}
                     <span className="text-sm">{contact.email}</span>
                   </div>
                 </TableCell>
-                <TableCell>{formatDate(contact.lastContact)}</TableCell>
+                <TableCell>{formatDate(contact.last_contact_date)}</TableCell>
                 <TableCell>
                   <div className="flex space-x-2">
                     <Button variant="outline" size="sm">

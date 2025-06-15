@@ -1,27 +1,30 @@
-
 import React, { useState } from 'react';
-import { Search, Filter, Plus, DollarSign, Calendar, TrendingUp, Target } from 'lucide-react';
+import { Search, Filter, Plus, DollarSign, Calendar, TrendingUp, Target, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { mockOpportunities, mockClients } from '@/data/mockCRMData';
+import { useQuery } from '@tanstack/react-query';
+import { getOpportunities } from '@/data/opportunities';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 const OpportunitiesTab = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStage, setFilterStage] = useState<string>('all');
 
-  const opportunitiesWithClients = mockOpportunities.map(opp => ({
-    ...opp,
-    clientName: mockClients.find(c => c.id === opp.clientId)?.name || 'Unknown'
-  }));
+  const { data: opportunities = [], isLoading, isError, error } = useQuery({
+    queryKey: ['opportunities'],
+    queryFn: getOpportunities,
+  });
 
-  const filteredOpportunities = opportunitiesWithClients.filter(opp => {
+  const filteredOpportunities = opportunities.filter(opp => {
+    const clientName = opp.clients?.name || '';
     const matchesSearch = 
       opp.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      opp.clientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      opp.description.toLowerCase().includes(searchTerm.toLowerCase());
+      clientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (opp.description && opp.description.toLowerCase().includes(searchTerm.toLowerCase()));
     const matchesStage = filterStage === 'all' || opp.stage === filterStage;
     return matchesSearch && matchesStage;
   });
@@ -43,7 +46,8 @@ const OpportunitiesTab = () => {
     return 'text-red-600';
   };
 
-  const formatCurrency = (amount: number) => {
+  const formatCurrency = (amount: number | null) => {
+    if (amount === null || amount === undefined) return 'N/A';
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',
@@ -52,23 +56,72 @@ const OpportunitiesTab = () => {
     }).format(amount);
   };
 
-  const formatDate = (date: Date) => {
+  const formatDate = (dateString: string | null) => {
+    if (!dateString) return 'N/A';
     return new Intl.DateTimeFormat('en-US', {
       month: 'short',
       day: 'numeric',
       year: 'numeric'
-    }).format(date);
+    }).format(new Date(dateString));
   };
 
+  const activeOpps = opportunities.filter(opp => !opp.stage.includes('closed'));
+  const totalValue = opportunities.reduce((sum, opp) => sum + (opp.value || 0), 0);
+  const weightedValue = activeOpps.reduce((sum, opp) => sum + ((opp.value || 0) * (opp.probability || 0) / 100), 0);
+
   const stats = {
-    total: mockOpportunities.length,
-    totalValue: mockOpportunities.reduce((sum, opp) => sum + opp.value, 0),
-    avgValue: mockOpportunities.reduce((sum, opp) => sum + opp.value, 0) / mockOpportunities.length,
-    weightedValue: mockOpportunities.reduce((sum, opp) => sum + (opp.value * opp.probability / 100), 0),
-    activeOpps: mockOpportunities.filter(opp => !opp.stage.includes('closed')).length
+    total: opportunities.length,
+    totalValue: totalValue,
+    avgValue: opportunities.length > 0 ? totalValue / opportunities.length : 0,
+    weightedValue: weightedValue,
+    activeOpps: activeOpps.length
   };
 
   const stages = ['discovery', 'proposal', 'negotiation', 'closed-won', 'closed-lost'];
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+          <Card>
+            <CardContent className="p-4">
+              <Skeleton className="h-10 w-full" />
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4">
+              <Skeleton className="h-10 w-full" />
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4">
+              <Skeleton className="h-10 w-full" />
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4">
+              <Skeleton className="h-10 w-full" />
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4">
+              <Skeleton className="h-10 w-full" />
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <Alert variant="destructive">
+        <AlertTriangle className="h-4 w-4" />
+        <AlertTitle>Error Loading Opportunities</AlertTitle>
+        <AlertDescription>{error.message}</AlertDescription>
+      </Alert>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -145,7 +198,7 @@ const OpportunitiesTab = () => {
               <div className="flex items-start justify-between">
                 <div>
                   <CardTitle className="text-lg">{opportunity.title}</CardTitle>
-                  <p className="text-sm text-muted-foreground mt-1">{opportunity.clientName}</p>
+                  <p className="text-sm text-muted-foreground mt-1">{opportunity.clients?.name || 'Unknown'}</p>
                 </div>
                 <Badge className={getStageColor(opportunity.stage)}>
                   {opportunity.stage.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
@@ -167,7 +220,7 @@ const OpportunitiesTab = () => {
                 <div className="flex items-center space-x-2">
                   <Target className="h-4 w-4 text-muted-foreground" />
                   <div>
-                    <div className={`font-semibold ${getProbabilityColor(opportunity.probability)}`}>
+                    <div className={`font-semibold ${getProbabilityColor(opportunity.probability || 0)}`}>
                       {opportunity.probability}%
                     </div>
                     <div className="text-xs text-muted-foreground">Probability</div>
@@ -179,11 +232,11 @@ const OpportunitiesTab = () => {
               <div>
                 <div className="flex justify-between text-sm mb-1">
                   <span>Win Probability</span>
-                  <span className={getProbabilityColor(opportunity.probability)}>
+                  <span className={getProbabilityColor(opportunity.probability || 0)}>
                     {opportunity.probability}%
                   </span>
                 </div>
-                <Progress value={opportunity.probability} className="h-2" />
+                <Progress value={opportunity.probability || 0} className="h-2" />
               </div>
 
               {/* Dates */}
@@ -192,14 +245,14 @@ const OpportunitiesTab = () => {
                   <Calendar className="h-4 w-4 text-muted-foreground" />
                   <div>
                     <div className="text-muted-foreground">Expected Close</div>
-                    <div>{formatDate(opportunity.expectedCloseDate)}</div>
+                    <div>{formatDate(opportunity.expected_close_date)}</div>
                   </div>
                 </div>
                 <div className="flex items-center space-x-2">
                   <TrendingUp className="h-4 w-4 text-muted-foreground" />
                   <div>
                     <div className="text-muted-foreground">Created</div>
-                    <div>{formatDate(opportunity.createdAt)}</div>
+                    <div>{formatDate(opportunity.created_at)}</div>
                   </div>
                 </div>
               </div>
@@ -208,12 +261,12 @@ const OpportunitiesTab = () => {
               <div className="pt-2 border-t">
                 <div className="text-sm">
                   <span className="text-muted-foreground">Owner: </span>
-                  <span className="font-medium">{opportunity.teamMember}</span>
+                  <span className="font-medium">{opportunity.team_member}</span>
                 </div>
               </div>
 
               {/* Tags */}
-              {opportunity.tags.length > 0 && (
+              {opportunity.tags && opportunity.tags.length > 0 && (
                 <div className="flex flex-wrap gap-1">
                   {opportunity.tags.map((tag) => (
                     <Badge key={tag} variant="outline" className="text-xs">
@@ -227,7 +280,7 @@ const OpportunitiesTab = () => {
         ))}
       </div>
 
-      {filteredOpportunities.length === 0 && (
+      {filteredOpportunities.length === 0 && !isLoading && (
         <div className="text-center py-12">
           <p className="text-muted-foreground">No opportunities found matching your search criteria.</p>
         </div>
