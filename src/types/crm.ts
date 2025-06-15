@@ -1,10 +1,11 @@
-
 import { Tables } from '@/integrations/supabase/types';
 
 export type Client = Tables<'clients'>;
 export type Contact = Tables<'contacts'>;
 export type ClientActivity = Tables<'client_activities'>;
-export type Opportunity = Tables<'opportunities'>;
+export type Opportunity = Tables<'opportunities'> & {
+  clients: { name: string } | null;
+};
 
 // The interfaces below are for aggregated data views and don't map directly to a single table.
 // We will keep them for now and adjust as needed when implementing those features.
