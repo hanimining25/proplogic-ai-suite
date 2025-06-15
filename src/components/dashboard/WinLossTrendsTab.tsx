@@ -2,10 +2,15 @@
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer, BarChart, Bar, ComposedChart, Area, AreaChart } from 'recharts';
+import { Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Bar, ComposedChart, Area, AreaChart } from 'recharts';
 import { TrendingUp, TrendingDown, Target, DollarSign } from 'lucide-react';
 import StatsCard from './StatsCard';
-import { mockWinLossData } from '@/data/mockDashboardData';
+import { useQuery } from '@tanstack/react-query';
+import { getWinLossData } from '@/data/winLoss';
+import { WinLossData } from '@/types/dashboard';
+import { Skeleton } from '../ui/skeleton';
+import { Alert, AlertTitle, AlertDescription } from '../ui/alert';
+import { AlertTriangle } from 'lucide-react';
 
 const chartConfig = {
   wins: { label: "Wins", color: "#22c55e" },
@@ -15,28 +20,26 @@ const chartConfig = {
 };
 
 const WinLossTrendsTab = () => {
-  const totalWins = mockWinLossData.reduce((sum, data) => sum + data.wins, 0);
-  const totalLosses = mockWinLossData.reduce((sum, data) => sum + data.losses, 0);
-  const totalValue = mockWinLossData.reduce((sum, data) => sum + data.value, 0);
-  const overallWinRate = (totalWins / (totalWins + totalLosses)) * 100;
-  
-  const currentMonth = mockWinLossData[mockWinLossData.length - 1];
-  const previousMonth = mockWinLossData[mockWinLossData.length - 2];
-  const winRateChange = currentMonth.winRate - previousMonth.winRate;
+  const { data: winLossData, isLoading, isError, error } = useQuery<WinLossData[]>({
+    queryKey: ['winLossData'],
+    queryFn: getWinLossData
+  });
 
-  const competitorData = [
-    { competitor: 'TechSolutions Inc.', winRate: 72, ourWinRate: 85, market: 'Enterprise' },
-    { competitor: 'Global Consulting', winRate: 68, ourWinRate: 82, market: 'Healthcare' },
-    { competitor: 'Innovation Partners', winRate: 75, ourWinRate: 78, market: 'Government' },
-    { competitor: 'Digital Dynamics', winRate: 71, ourWinRate: 88, market: 'Education' }
-  ];
+  const summary = React.useMemo(() => {
+    if (!winLossData || winLossData.length === 0) {
+      return { totalWins: 0, totalLosses: 0, totalValue: 0, overallWinRate: 0, winRateChange: 0 };
+    }
+    const totalWins = winLossData.reduce((sum, data) => sum + data.wins, 0);
+    const totalLosses = winLossData.reduce((sum, data) => sum + data.losses, 0);
+    const totalValue = winLossData.reduce((sum, data) => sum + data.value, 0);
+    const overallWinRate = (totalWins + totalLosses > 0) ? (totalWins / (totalWins + totalLosses)) * 100 : 0;
+    
+    const currentMonth = winLossData[winLossData.length - 1];
+    const previousMonth = winLossData.length > 1 ? winLossData[winLossData.length - 2] : { winRate: 0 };
+    const winRateChange = currentMonth.winRate - previousMonth.winRate;
 
-  const segmentData = [
-    { segment: 'Enterprise', wins: 15, losses: 3, winRate: 83.3, avgValue: 180000 },
-    { segment: 'Healthcare', wins: 12, losses: 2, winRate: 85.7, avgValue: 220000 },
-    { segment: 'Government', wins: 8, losses: 4, winRate: 66.7, avgValue: 350000 },
-    { segment: 'Education', wins: 10, losses: 1, winRate: 90.9, avgValue: 95000 }
-  ];
+    return { totalWins, totalLosses, totalValue, overallWinRate, winRateChange };
+  }, [winLossData]);
 
   return (
     <div className="space-y-6">
@@ -45,35 +48,40 @@ const WinLossTrendsTab = () => {
         <p className="text-muted-foreground">Comprehensive analysis of proposal success rates, competitive performance, and market trends.</p>
       </div>
 
+      {isError && (
+        <Alert variant="destructive">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertTitle>Error loading Win/Loss data</AlertTitle>
+          <AlertDescription>{(error as Error)?.message}</AlertDescription>
+        </Alert>
+      )}
+
       {/* Key Metrics */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <StatsCard
           title="Overall Win Rate"
-          value={`${overallWinRate.toFixed(1)}%`}
+          value={isLoading ? <Skeleton className="h-8 w-2/3" /> : `${summary.overallWinRate.toFixed(1)}%`}
           description="All time average"
           icon={<Target className="h-4 w-4" />}
-          trend={{ value: Math.round(winRateChange), isPositive: winRateChange > 0 }}
+          trend={isLoading ? undefined : { value: Math.round(summary.winRateChange), isPositive: summary.winRateChange > 0 }}
         />
         <StatsCard
           title="Total Wins"
-          value={totalWins}
+          value={isLoading ? <Skeleton className="h-8 w-2/3" /> : summary.totalWins}
           description="Successful proposals"
           icon={<TrendingUp className="h-4 w-4" />}
-          trend={{ value: 12, isPositive: true }}
         />
         <StatsCard
           title="Total Revenue"
-          value={`$${(totalValue / 1000000).toFixed(1)}M`}
+          value={isLoading ? <Skeleton className="h-8 w-2/3" /> : `$${(summary.totalValue / 1000000).toFixed(1)}M`}
           description="Won proposals"
           icon={<DollarSign className="h-4 w-4" />}
-          trend={{ value: 18, isPositive: true }}
         />
         <StatsCard
           title="Loss Rate"
-          value={`${((totalLosses / (totalWins + totalLosses)) * 100).toFixed(1)}%`}
+          value={isLoading ? <Skeleton className="h-8 w-2/3" /> : `${(100-summary.overallWinRate).toFixed(1)}%`}
           description="Unsuccessful bids"
           icon={<TrendingDown className="h-4 w-4" />}
-          trend={{ value: 5, isPositive: false }}
         />
       </div>
 
@@ -86,17 +94,19 @@ const WinLossTrendsTab = () => {
           </CardHeader>
           <CardContent>
             <ChartContainer config={chartConfig} className="h-[300px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <ComposedChart data={mockWinLossData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="period" />
-                  <YAxis />
-                  <ChartTooltip content={<ChartTooltipContent />} />
-                  <Bar dataKey="wins" fill="var(--color-wins)" />
-                  <Bar dataKey="losses" fill="var(--color-losses)" />
-                  <Line type="monotone" dataKey="winRate" stroke="var(--color-winRate)" strokeWidth={3} />
-                </ComposedChart>
-              </ResponsiveContainer>
+              {isLoading ? <Skeleton className="h-full w-full" /> : (
+                <ResponsiveContainer width="100%" height="100%">
+                  <ComposedChart data={winLossData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="period" />
+                    <YAxis />
+                    <ChartTooltip content={<ChartTooltipContent />} />
+                    <Bar dataKey="wins" fill="var(--color-wins)" />
+                    <Bar dataKey="losses" fill="var(--color-losses)" />
+                    <Line type="monotone" dataKey="winRate" stroke="var(--color-winRate)" strokeWidth={3} />
+                  </ComposedChart>
+                </ResponsiveContainer>
+              )}
             </ChartContainer>
           </CardContent>
         </Card>
@@ -109,21 +119,23 @@ const WinLossTrendsTab = () => {
           </CardHeader>
           <CardContent>
             <ChartContainer config={chartConfig} className="h-[300px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={mockWinLossData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="period" />
-                  <YAxis />
-                  <ChartTooltip content={<ChartTooltipContent />} />
-                  <Area 
-                    type="monotone" 
-                    dataKey="winRate" 
-                    stroke="var(--color-winRate)" 
-                    fill="var(--color-winRate)" 
-                    fillOpacity={0.3}
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
+              {isLoading ? <Skeleton className="h-full w-full" /> : (
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={winLossData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="period" />
+                    <YAxis domain={[0, 100]} />
+                    <ChartTooltip content={<ChartTooltipContent />} />
+                    <Area 
+                      type="monotone" 
+                      dataKey="winRate" 
+                      stroke="var(--color-winRate)" 
+                      fill="var(--color-winRate)" 
+                      fillOpacity={0.3}
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+              )}
             </ChartContainer>
           </CardContent>
         </Card>
@@ -135,28 +147,8 @@ const WinLossTrendsTab = () => {
           <CardTitle>Win Rate by Market Segment</CardTitle>
           <CardDescription>Performance breakdown across different market sectors</CardDescription>
         </CardHeader>
-        <CardContent>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            {segmentData.map((segment, index) => (
-              <div key={index} className="p-4 border rounded-lg">
-                <h4 className="font-semibold">{segment.segment}</h4>
-                <div className="mt-2 space-y-2">
-                  <div className="flex justify-between">
-                    <span className="text-sm">Win Rate</span>
-                    <span className="font-medium">{segment.winRate.toFixed(1)}%</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm">Wins/Losses</span>
-                    <span className="font-medium">{segment.wins}/{segment.losses}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm">Avg Value</span>
-                    <span className="font-medium">${(segment.avgValue / 1000).toFixed(0)}k</span>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
+        <CardContent className="h-[150px] flex items-center justify-center">
+            <p className="text-muted-foreground text-center">Market segment analysis not yet available.</p>
         </CardContent>
       </Card>
 
@@ -166,43 +158,8 @@ const WinLossTrendsTab = () => {
           <CardTitle>Competitive Win Rates</CardTitle>
           <CardDescription>How we perform against key competitors</CardDescription>
         </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {competitorData.map((comp, index) => (
-              <div key={index} className="p-4 border rounded-lg">
-                <div className="flex justify-between items-center mb-2">
-                  <h4 className="font-semibold">{comp.competitor}</h4>
-                  <span className="text-sm text-muted-foreground">{comp.market}</span>
-                </div>
-                <div className="grid gap-2 md:grid-cols-2">
-                  <div>
-                    <div className="flex justify-between">
-                      <span className="text-sm">Their Win Rate</span>
-                      <span className="font-medium">{comp.winRate}%</span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2 mt-1">
-                      <div 
-                        className="bg-red-500 h-2 rounded-full" 
-                        style={{ width: `${comp.winRate}%` }}
-                      ></div>
-                    </div>
-                  </div>
-                  <div>
-                    <div className="flex justify-between">
-                      <span className="text-sm">Our Win Rate</span>
-                      <span className="font-medium">{comp.ourWinRate}%</span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2 mt-1">
-                      <div 
-                        className="bg-green-500 h-2 rounded-full" 
-                        style={{ width: `${comp.ourWinRate}%` }}
-                      ></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
+        <CardContent className="h-[200px] flex items-center justify-center">
+            <p className="text-muted-foreground text-center">Competitive analysis not yet available.</p>
         </CardContent>
       </Card>
 
@@ -212,25 +169,8 @@ const WinLossTrendsTab = () => {
           <CardHeader>
             <CardTitle className="text-lg">Top Loss Reasons</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              <div className="flex justify-between">
-                <span className="text-sm">Price Too High</span>
-                <span className="font-medium">32%</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-sm">Late Submission</span>
-                <span className="font-medium">18%</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-sm">Missing Requirements</span>
-                <span className="font-medium">25%</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-sm">Competitor Advantage</span>
-                <span className="font-medium">25%</span>
-              </div>
-            </div>
+          <CardContent className="h-[150px] flex items-center justify-center">
+            <p className="text-muted-foreground text-center">Data not available.</p>
           </CardContent>
         </Card>
 
@@ -238,25 +178,8 @@ const WinLossTrendsTab = () => {
           <CardHeader>
             <CardTitle className="text-lg">Win Factors</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              <div className="flex justify-between">
-                <span className="text-sm">Best Value</span>
-                <span className="font-medium">45%</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-sm">Technical Excellence</span>
-                <span className="font-medium">35%</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-sm">Past Performance</span>
-                <span className="font-medium">15%</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-sm">Innovation</span>
-                <span className="font-medium">5%</span>
-              </div>
-            </div>
+          <CardContent className="h-[150px] flex items-center justify-center">
+            <p className="text-muted-foreground text-center">Data not available.</p>
           </CardContent>
         </Card>
 
@@ -264,25 +187,8 @@ const WinLossTrendsTab = () => {
           <CardHeader>
             <CardTitle className="text-lg">Improvement Areas</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              <div className="flex justify-between">
-                <span className="text-sm">Pricing Strategy</span>
-                <span className="font-medium text-yellow-600">Review</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-sm">Time Management</span>
-                <span className="font-medium text-green-600">Good</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-sm">Requirements Analysis</span>
-                <span className="font-medium text-yellow-600">Improve</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-sm">Competitive Intelligence</span>
-                <span className="font-medium text-green-600">Strong</span>
-              </div>
-            </div>
+          <CardContent className="h-[150px] flex items-center justify-center">
+            <p className="text-muted-foreground text-center">Data not available.</p>
           </CardContent>
         </Card>
       </div>

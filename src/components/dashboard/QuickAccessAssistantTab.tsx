@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -13,19 +12,7 @@ const QuickAccessAssistantTab = () => {
       id: '1',
       type: 'assistant',
       message: 'Hello! I\'m your AI assistant. How can I help you today? I can help with proposals, RFPs, deadlines, and more.',
-      timestamp: '10:30 AM'
-    },
-    {
-      id: '2',
-      type: 'user',
-      message: 'What proposals are due this week?',
-      timestamp: '10:31 AM'
-    },
-    {
-      id: '3',
-      type: 'assistant',
-      message: 'You have 2 proposals due this week:\n\n1. Enterprise Software Implementation (TechCorp Inc.) - Due Jun 15\n2. Data Analytics Platform (Finance Corp) - Due Jul 10\n\nWould you like me to show you the status of these proposals?',
-      timestamp: '10:31 AM'
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     }
   ]);
 
@@ -96,7 +83,7 @@ const QuickAccessAssistantTab = () => {
             </CardHeader>
             <CardContent className="flex-1 flex flex-col">
               {/* Chat History */}
-              <div className="flex-1 overflow-y-auto space-y-4 mb-4">
+              <div className="flex-1 overflow-y-auto space-y-4 mb-4 p-2">
                 {chatHistory.map((chat) => (
                   <div key={chat.id} className={`flex ${chat.type === 'user' ? 'justify-end' : 'justify-start'}`}>
                     <div className={`max-w-[80%] p-3 rounded-lg ${
@@ -105,7 +92,7 @@ const QuickAccessAssistantTab = () => {
                         : 'bg-muted'
                     }`}>
                       <p className="text-sm whitespace-pre-line">{chat.message}</p>
-                      <p className="text-xs opacity-70 mt-1">{chat.timestamp}</p>
+                      <p className="text-xs opacity-70 mt-1 text-right">{chat.timestamp}</p>
                     </div>
                   </div>
                 ))}

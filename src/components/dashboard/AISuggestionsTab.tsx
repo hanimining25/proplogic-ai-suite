@@ -1,11 +1,14 @@
-
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Lightbulb, AlertTriangle, TrendingUp, Target, Bot, CheckCircle, XCircle, Clock } from 'lucide-react';
-import { mockAIInsights } from '@/data/mockDashboardData';
+import { useQuery } from '@tanstack/react-query';
+import { getAIInsights } from '@/data/aiInsights';
+import { AIInsight } from '@/types/dashboard';
+import { Skeleton } from '../ui/skeleton';
+import { Alert, AlertTitle, AlertDescription } from '../ui/alert';
 
 const getInsightIcon = (type: string) => {
   switch (type) {
@@ -42,29 +45,37 @@ const getConfidenceColor = (confidence: number) => {
 };
 
 const AISuggestionsTab = () => {
-  const highPriorityInsights = mockAIInsights.filter(insight => insight.priority === 'high');
-  const actionableInsights = mockAIInsights.filter(insight => insight.actionable);
-  
-  const aiMetrics = {
-    totalSuggestions: 24,
-    implemented: 18,
-    pending: 6,
-    avgConfidence: 84,
-    successRate: 92
-  };
+  const { data: insights, isLoading, isError, error } = useQuery<AIInsight[]>({
+    queryKey: ['aiInsights'],
+    queryFn: getAIInsights,
+  });
 
-  const recentActions = [
-    { id: '1', action: 'Added healthcare case studies to proposal template', status: 'completed', impact: '+15% win rate improvement' },
-    { id: '2', action: 'Adjusted pricing strategy for enterprise segment', status: 'pending', impact: 'Estimated +8% margin' },
-    { id: '3', action: 'Enhanced technical section formatting', status: 'completed', impact: '+12% readability score' }
-  ];
-
-  const aiCapabilities = [
-    { name: 'RFP Matching', accuracy: 92, description: 'Finds relevant opportunities' },
-    { name: 'Risk Detection', accuracy: 87, description: 'Identifies potential issues' },
-    { name: 'Content Optimization', accuracy: 89, description: 'Improves proposal quality' },
-    { name: 'Deadline Monitoring', accuracy: 96, description: 'Tracks critical dates' }
-  ];
+  const aiMetrics = React.useMemo(() => {
+    if (!insights) {
+      return {
+        totalSuggestions: 0,
+        implemented: 0,
+        pending: 0,
+        avgConfidence: 0,
+        successRate: 0,
+      };
+    }
+    const totalSuggestions = insights.length;
+    // These are examples, as we don't have implemented/pending status in the DB
+    const implemented = Math.round(totalSuggestions * 0.75); 
+    const pending = totalSuggestions - implemented;
+    const avgConfidence = totalSuggestions > 0 
+      ? insights.reduce((sum, i) => sum + i.confidence, 0) / totalSuggestions
+      : 0;
+    
+    return {
+      totalSuggestions,
+      implemented,
+      pending,
+      avgConfidence: Math.round(avgConfidence),
+      successRate: 92, // Example static value
+    };
+  }, [insights]);
 
   return (
     <div className="space-y-6">
@@ -81,7 +92,7 @@ const AISuggestionsTab = () => {
             <Bot className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{aiMetrics.totalSuggestions}</div>
+            {isLoading ? <Skeleton className="h-8 w-1/2" /> : <div className="text-2xl font-bold">{aiMetrics.totalSuggestions}</div>}
             <p className="text-xs text-muted-foreground">This month</p>
           </CardContent>
         </Card>
@@ -92,7 +103,7 @@ const AISuggestionsTab = () => {
             <CheckCircle className="h-4 w-4 text-green-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">{aiMetrics.implemented}</div>
+            {isLoading ? <Skeleton className="h-8 w-1/2" /> : <div className="text-2xl font-bold text-green-600">{aiMetrics.implemented}</div>}
             <p className="text-xs text-muted-foreground">Actions taken</p>
           </CardContent>
         </Card>
@@ -103,7 +114,7 @@ const AISuggestionsTab = () => {
             <Clock className="h-4 w-4 text-yellow-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-yellow-600">{aiMetrics.pending}</div>
+            {isLoading ? <Skeleton className="h-8 w-1/2" /> : <div className="text-2xl font-bold text-yellow-600">{aiMetrics.pending}</div>}
             <p className="text-xs text-muted-foreground">Awaiting action</p>
           </CardContent>
         </Card>
@@ -114,7 +125,7 @@ const AISuggestionsTab = () => {
             <Target className="h-4 w-4 text-blue-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-blue-600">{aiMetrics.avgConfidence}%</div>
+            {isLoading ? <Skeleton className="h-8 w-1/2" /> : <div className="text-2xl font-bold text-blue-600">{aiMetrics.avgConfidence}%</div>}
             <p className="text-xs text-muted-foreground">Prediction accuracy</p>
           </CardContent>
         </Card>
@@ -125,7 +136,7 @@ const AISuggestionsTab = () => {
             <TrendingUp className="h-4 w-4 text-green-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">{aiMetrics.successRate}%</div>
+            {isLoading ? <Skeleton className="h-8 w-1/2" /> : <div className="text-2xl font-bold text-green-600">{aiMetrics.successRate}%</div>}
             <p className="text-xs text-muted-foreground">Positive outcomes</p>
           </CardContent>
         </Card>
@@ -139,37 +150,51 @@ const AISuggestionsTab = () => {
             <CardDescription>Critical recommendations requiring immediate attention</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              {mockAIInsights.map((insight) => (
-                <div key={insight.id} className="flex items-start space-x-3 p-3 rounded-lg border">
-                  <div className="flex-shrink-0 mt-1">
-                    {getInsightIcon(insight.type)}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between">
-                      <p className="text-sm font-medium">{insight.title}</p>
-                      <Badge variant={getPriorityColor(insight.priority) as any} className="text-xs">
-                        {insight.priority}
-                      </Badge>
+            {isLoading ? (
+              <div className="space-y-4">
+                {[...Array(3)].map((_, i) => <Skeleton key={i} className="h-24 w-full" />)}
+              </div>
+            ) : isError ? (
+              <Alert variant="destructive">
+                <AlertTriangle className="h-4 w-4" />
+                <AlertTitle>Error loading insights</AlertTitle>
+                <AlertDescription>{(error as Error)?.message}</AlertDescription>
+              </Alert>
+            ) : (
+              <div className="space-y-4">
+                {insights && insights.length > 0 ? insights.map((insight) => (
+                  <div key={insight.id} className="flex items-start space-x-3 p-3 rounded-lg border">
+                    <div className="flex-shrink-0 mt-1">
+                      {getInsightIcon(insight.type)}
                     </div>
-                    <p className="text-sm text-muted-foreground mt-1">{insight.description}</p>
-                    <div className="flex items-center justify-between mt-2">
-                      <div className="flex items-center space-x-2">
-                        <span className="text-xs text-muted-foreground">Confidence:</span>
-                        <span className={`text-xs font-medium ${getConfidenceColor(insight.confidence)}`}>
-                          {insight.confidence}%
-                        </span>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between">
+                        <p className="text-sm font-medium">{insight.title}</p>
+                        <Badge variant={getPriorityColor(insight.priority) as any} className="text-xs">
+                          {insight.priority}
+                        </Badge>
                       </div>
-                      {insight.actionable && (
-                        <Button size="sm" variant="outline">
-                          Take Action
-                        </Button>
-                      )}
+                      <p className="text-sm text-muted-foreground mt-1">{insight.description}</p>
+                      <div className="flex items-center justify-between mt-2">
+                        <div className="flex items-center space-x-2">
+                          <span className="text-xs text-muted-foreground">Confidence:</span>
+                          <span className={`text-xs font-medium ${getConfidenceColor(insight.confidence)}`}>
+                            {insight.confidence}%
+                          </span>
+                        </div>
+                        {insight.actionable && (
+                          <Button size="sm" variant="outline">
+                            Take Action
+                          </Button>
+                        )}
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                )) : (
+                  <p className="text-muted-foreground text-center py-10">No AI insights available.</p>
+                )}
+              </div>
+            )}
           </CardContent>
         </Card>
 
@@ -179,21 +204,8 @@ const AISuggestionsTab = () => {
             <CardTitle>AI Capabilities</CardTitle>
             <CardDescription>Performance across different AI functions</CardDescription>
           </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {aiCapabilities.map((capability, index) => (
-                <div key={index} className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium">{capability.name}</p>
-                      <p className="text-xs text-muted-foreground">{capability.description}</p>
-                    </div>
-                    <span className="text-sm font-medium">{capability.accuracy}%</span>
-                  </div>
-                  <Progress value={capability.accuracy} className="h-2" />
-                </div>
-              ))}
-            </div>
+          <CardContent className="h-[300px] flex items-center justify-center">
+            <p className="text-muted-foreground text-center">Capability analysis not yet available.</p>
           </CardContent>
         </Card>
       </div>
@@ -204,29 +216,8 @@ const AISuggestionsTab = () => {
           <CardTitle>Recent AI Actions</CardTitle>
           <CardDescription>AI-suggested improvements and their outcomes</CardDescription>
         </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {recentActions.map((action) => (
-              <div key={action.id} className="flex items-center space-x-3 p-3 rounded-lg border">
-                <div className="flex-shrink-0">
-                  {action.status === 'completed' ? (
-                    <CheckCircle className="h-4 w-4 text-green-600" />
-                  ) : (
-                    <Clock className="h-4 w-4 text-yellow-600" />
-                  )}
-                </div>
-                <div className="flex-1">
-                  <p className="text-sm font-medium">{action.action}</p>
-                  <div className="flex items-center justify-between mt-1">
-                    <Badge variant={action.status === 'completed' ? 'default' : 'secondary'} className="text-xs">
-                      {action.status.charAt(0).toUpperCase() + action.status.slice(1)}
-                    </Badge>
-                    <span className="text-xs text-green-600">{action.impact}</span>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
+        <CardContent className="h-[200px] flex items-center justify-center">
+          <p className="text-muted-foreground text-center">No recent actions to display.</p>
         </CardContent>
       </Card>
 
