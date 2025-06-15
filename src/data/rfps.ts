@@ -55,7 +55,8 @@ export const createRfp = async (values: NewRFPFormValues, file: File | null) => 
     }
 
     const newRfpData: TablesInsert<'rfps'> = {
-        ...values,
+        title: values.title,
+        client_name: values.client_name,
         due_date: values.due_date?.toISOString(),
         org_id: orgId,
         document_url: documentUrl,
