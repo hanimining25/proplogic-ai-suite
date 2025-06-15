@@ -1,7 +1,17 @@
 
 import React from "react";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { useNavigate, useLocation } from "react-router-dom";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useNavigate, useLocation, Routes, Route } from "react-router-dom";
+import DraftProposals from "@/components/proposals/DraftProposals";
+import TPBuilder from "@/components/proposals/TPBuilder";
+import CPComposer from "@/components/proposals/CPComposer";
+import ComplianceMatrix from "@/components/proposals/ComplianceMatrix";
+import ReusableSections from "@/components/proposals/ReusableSections";
+import AIWritingAssistant from "@/components/proposals/AIWritingAssistant";
+import LegalClauseGenerator from "@/components/proposals/LegalClauseGenerator";
+import ProposalSimulator from "@/components/proposals/ProposalSimulator";
+import StyleToneAdapter from "@/components/proposals/StyleToneAdapter";
+import ProposalScoringReport from "@/components/proposals/ProposalScoringReport";
 
 // Proposals tabs configuration
 const proposalTabs = [
@@ -54,16 +64,18 @@ const Proposals = () => {
         </TabsList>
         
         <div className="mt-6">
-          {currentPath === "/proposals" && (
-            <div>
-              <h3 className="text-xl font-semibold mb-4">Draft Proposals</h3>
-              <div className="grid gap-4">
-                <p>Manage and edit your draft proposals.</p>
-                {/* Original Proposals content */}
-              </div>
-            </div>
-          )}
-          {/* The other tab content will be shown through routing */}
+          <Routes>
+            <Route index element={<DraftProposals />} />
+            <Route path="tp-builder" element={<TPBuilder />} />
+            <Route path="cp-composer" element={<CPComposer />} />
+            <Route path="compliance" element={<ComplianceMatrix />} />
+            <Route path="sections" element={<ReusableSections />} />
+            <Route path="ai-writing" element={<AIWritingAssistant />} />
+            <Route path="clause-generator" element={<LegalClauseGenerator />} />
+            <Route path="simulator" element={<ProposalSimulator />} />
+            <Route path="style" element={<StyleToneAdapter />} />
+            <Route path="scoring" element={<ProposalScoringReport />} />
+          </Routes>
         </div>
       </Tabs>
     </div>

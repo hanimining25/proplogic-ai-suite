@@ -41,12 +41,8 @@ const router = createBrowserRouter([
         element: <CRM />,
       },
       {
-        path: "proposals",
+        path: "proposals/*",
         element: <Proposals />,
-      },
-      {
-        path: "rfps",
-        element: <RFPs />,
       },
       {
         path: "rfps/new",
@@ -57,7 +53,11 @@ const router = createBrowserRouter([
         element: <RFPDetailPage />,
       },
       {
-        path: "settings",
+        path: "rfps/*",
+        element: <RFPs />,
+      },
+      {
+        path: "settings/*",
         element: <Settings />,
       },
       // Routes for features under construction, leading to a helpful page

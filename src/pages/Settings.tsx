@@ -1,15 +1,19 @@
 
 import React from "react";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { useNavigate, useLocation } from "react-router-dom";
-import ProfileTab from "@/components/settings/ProfileTab";
-import NotificationsTab from "@/components/settings/NotificationsTab";
-import AppearanceTab from "@/components/settings/AppearanceTab";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useNavigate, useLocation, Routes, Route } from "react-router-dom";
 import SecurityTab from "@/components/settings/SecurityTab";
+import CompanySettingsTab from "@/components/settings/CompanySettingsTab";
+import UsersTab from "@/components/settings/UsersTab";
+import EmailTab from "@/components/settings/EmailTab";
+import LocalizationTab from "@/components/settings/LocalizationTab";
+import IntegrationsTab from "@/components/settings/IntegrationsTab";
+import BillingTab from "@/components/settings/BillingTab";
+import LegalTab from "@/components/settings/LegalTab";
 
 // Settings tabs configuration
 const settingsTabs = [
-  { value: "profile", label: "Company Settings", path: "/settings/company" },
+  { value: "company", label: "Company Settings", path: "/settings" },
   { value: "users", label: "User Roles & Permissions", path: "/settings/users" },
   { value: "email", label: "Email Templates & Workflows", path: "/settings/email" },
   { value: "localization", label: "Localization", path: "/settings/localization" },
@@ -27,7 +31,7 @@ const Settings = () => {
   // Determine active tab based on current path
   const getActiveTab = () => {
     const activeTab = settingsTabs.find(tab => tab.path === currentPath);
-    return activeTab ? activeTab.value : "profile";
+    return activeTab ? activeTab.value : "company";
   };
   
   const handleTabChange = (value: string) => {
@@ -35,14 +39,6 @@ const Settings = () => {
     if (tab) {
       navigate(tab.path);
     }
-  };
-
-  // Default profile data for the ProfileTab component
-  const defaultProfileData = {
-    name: "John Doe",
-    email: "john.doe@company.com",
-    position: "Senior Manager",
-    bio: "Experienced professional with expertise in proposal management and business development."
   };
 
   return (
@@ -64,70 +60,16 @@ const Settings = () => {
         </TabsList>
         
         <div className="mt-6">
-          {currentPath === "/settings/company" && (
-            <TabsContent value="profile" className="space-y-6">
-              <ProfileTab initialData={defaultProfileData} />
-            </TabsContent>
-          )}
-          {currentPath === "/settings/security" && (
-            <TabsContent value="security" className="space-y-6">
-              <SecurityTab />
-            </TabsContent>
-          )}
-          {currentPath === "/settings/users" && (
-            <TabsContent value="users" className="space-y-6">
-              <div>
-                <h3 className="text-xl font-semibold mb-4">User Roles & Permissions</h3>
-                <p>Manage user roles and permissions settings.</p>
-                {/* Add user management content here */}
-              </div>
-            </TabsContent>
-          )}
-          {currentPath === "/settings/email" && (
-            <TabsContent value="email" className="space-y-6">
-              <div>
-                <h3 className="text-xl font-semibold mb-4">Email Templates & Workflows</h3>
-                <p>Configure email templates and workflows.</p>
-                {/* Add email settings content here */}
-              </div>
-            </TabsContent>
-          )}
-          {currentPath === "/settings/localization" && (
-            <TabsContent value="localization" className="space-y-6">
-              <div>
-                <h3 className="text-xl font-semibold mb-4">Localization</h3>
-                <p>Manage localization settings.</p>
-                {/* Add localization settings content here */}
-              </div>
-            </TabsContent>
-          )}
-          {currentPath === "/settings/integrations" && (
-            <TabsContent value="integrations" className="space-y-6">
-              <div>
-                <h3 className="text-xl font-semibold mb-4">API Integrations</h3>
-                <p>Configure API integrations.</p>
-                {/* Add integrations settings content here */}
-              </div>
-            </TabsContent>
-          )}
-          {currentPath === "/settings/billing" && (
-            <TabsContent value="billing" className="space-y-6">
-              <div>
-                <h3 className="text-xl font-semibold mb-4">Subscription & Billing</h3>
-                <p>Manage subscription and billing settings.</p>
-                {/* Add billing settings content here */}
-              </div>
-            </TabsContent>
-          )}
-          {currentPath === "/settings/legal" && (
-            <TabsContent value="legal" className="space-y-6">
-              <div>
-                <h3 className="text-xl font-semibold mb-4">Legal & Compliance</h3>
-                <p>Manage legal and compliance settings.</p>
-                {/* Add legal settings content here */}
-              </div>
-            </TabsContent>
-          )}
+          <Routes>
+            <Route index element={<CompanySettingsTab />} />
+            <Route path="users" element={<UsersTab />} />
+            <Route path="email" element={<EmailTab />} />
+            <Route path="localization" element={<LocalizationTab />} />
+            <Route path="integrations" element={<IntegrationsTab />} />
+            <Route path="security" element={<SecurityTab />} />
+            <Route path="billing" element={<BillingTab />} />
+            <Route path="legal" element={<LegalTab />} />
+          </Routes>
         </div>
       </Tabs>
     </div>
