@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
@@ -58,31 +57,42 @@ const WinLossTrendsTab = () => {
 
       {/* Key Metrics */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <StatsCard
-          title="Overall Win Rate"
-          value={isLoading ? <Skeleton className="h-8 w-2/3" /> : `${summary.overallWinRate.toFixed(1)}%`}
-          description="All time average"
-          icon={<Target className="h-4 w-4" />}
-          trend={isLoading ? undefined : { value: Math.round(summary.winRateChange), isPositive: summary.winRateChange > 0 }}
-        />
-        <StatsCard
-          title="Total Wins"
-          value={isLoading ? <Skeleton className="h-8 w-2/3" /> : summary.totalWins}
-          description="Successful proposals"
-          icon={<TrendingUp className="h-4 w-4" />}
-        />
-        <StatsCard
-          title="Total Revenue"
-          value={isLoading ? <Skeleton className="h-8 w-2/3" /> : `$${(summary.totalValue / 1000000).toFixed(1)}M`}
-          description="Won proposals"
-          icon={<DollarSign className="h-4 w-4" />}
-        />
-        <StatsCard
-          title="Loss Rate"
-          value={isLoading ? <Skeleton className="h-8 w-2/3" /> : `${(100-summary.overallWinRate).toFixed(1)}%`}
-          description="Unsuccessful bids"
-          icon={<TrendingDown className="h-4 w-4" />}
-        />
+        {isLoading ? (
+          <>
+            <Skeleton className="h-[108px] rounded-lg" />
+            <Skeleton className="h-[108px] rounded-lg" />
+            <Skeleton className="h-[108px] rounded-lg" />
+            <Skeleton className="h-[108px] rounded-lg" />
+          </>
+        ) : (
+          <>
+            <StatsCard
+              title="Overall Win Rate"
+              value={`${summary.overallWinRate.toFixed(1)}%`}
+              description="All time average"
+              icon={<Target className="h-4 w-4" />}
+              trend={{ value: Math.round(summary.winRateChange), isPositive: summary.winRateChange > 0 }}
+            />
+            <StatsCard
+              title="Total Wins"
+              value={summary.totalWins}
+              description="Successful proposals"
+              icon={<TrendingUp className="h-4 w-4" />}
+            />
+            <StatsCard
+              title="Total Revenue"
+              value={`$${(summary.totalValue / 1000000).toFixed(1)}M`}
+              description="Won proposals"
+              icon={<DollarSign className="h-4 w-4" />}
+            />
+            <StatsCard
+              title="Loss Rate"
+              value={`${(100 - summary.overallWinRate).toFixed(1)}%`}
+              description="Unsuccessful bids"
+              icon={<TrendingDown className="h-4 w-4" />}
+            />
+          </>
+        )}
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">

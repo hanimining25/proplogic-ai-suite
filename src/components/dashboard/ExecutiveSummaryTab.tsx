@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
@@ -70,32 +69,43 @@ const ExecutiveSummaryTab = () => {
 
       {/* Executive KPIs */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <StatsCard
-          title="Monthly Revenue"
-          value={isLoading ? <Skeleton className="h-8 w-2/3" /> : `$${(summary.currentMonth.value / 1000).toFixed(0)}k`}
-          description="Current month"
-          icon={<DollarSign className="h-4 w-4" />}
-          trend={isLoading ? undefined : { value: Math.round(summary.revenueGrowth), isPositive: summary.revenueGrowth > 0 }}
-        />
-        <StatsCard
-          title="Win Rate"
-          value={isLoading ? <Skeleton className="h-8 w-2/3" /> : `${summary.currentMonth.winRate.toFixed(1)}%`}
-          description="Success rate"
-          icon={<Percent className="h-4 w-4" />}
-          trend={isLoading ? undefined : { value: Math.round(summary.winRateChange), isPositive: summary.winRateChange > 0 }}
-        />
-        <StatsCard
-          title="Active Proposals"
-          value={isLoading ? <Skeleton className="h-8 w-2/3" /> : summary.activeProposals}
-          description="In pipeline"
-          icon={<TrendingUp className="h-4 w-4" />}
-        />
-        <StatsCard
-          title="Avg. Deal Size"
-          value={isLoading ? <Skeleton className="h-8 w-2/3" /> : `$${(summary.avgDealSize / 1000).toFixed(0)}k`}
-          description="Per opportunity"
-          icon={<Calendar className="h-4 w-4" />}
-        />
+        {isLoading ? (
+          <>
+            <Skeleton className="h-[108px] rounded-lg" />
+            <Skeleton className="h-[108px] rounded-lg" />
+            <Skeleton className="h-[108px] rounded-lg" />
+            <Skeleton className="h-[108px] rounded-lg" />
+          </>
+        ) : (
+          <>
+            <StatsCard
+              title="Monthly Revenue"
+              value={`$${(summary.currentMonth.value / 1000).toFixed(0)}k`}
+              description="Current month"
+              icon={<DollarSign className="h-4 w-4" />}
+              trend={{ value: Math.round(summary.revenueGrowth), isPositive: summary.revenueGrowth > 0 }}
+            />
+            <StatsCard
+              title="Win Rate"
+              value={`${summary.currentMonth.winRate.toFixed(1)}%`}
+              description="Success rate"
+              icon={<Percent className="h-4 w-4" />}
+              trend={{ value: Math.round(summary.winRateChange), isPositive: summary.winRateChange > 0 }}
+            />
+            <StatsCard
+              title="Active Proposals"
+              value={summary.activeProposals}
+              description="In pipeline"
+              icon={<TrendingUp className="h-4 w-4" />}
+            />
+            <StatsCard
+              title="Avg. Deal Size"
+              value={`$${(summary.avgDealSize / 1000).toFixed(0)}k`}
+              description="Per opportunity"
+              icon={<Calendar className="h-4 w-4" />}
+            />
+          </>
+        )}
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">

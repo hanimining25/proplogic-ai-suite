@@ -7,7 +7,10 @@ import { PipelineStage } from '@/types/dashboard';
 export const getOpportunities = async (): Promise<Opportunity[]> => {
   const { data, error } = await supabase
     .from('opportunities')
-    .select('*');
+    .select(`
+      *,
+      clients ( name )
+    `);
 
   if (error) {
     console.error('Error fetching opportunities:', error);
