@@ -1,32 +1,68 @@
+
 import React from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
-import { TrendingUp, DollarSign, FileText, Users, Target, Clock } from 'lucide-react';
+import { TrendingUp, DollarSign, FileText, Target } from 'lucide-react';
 import StatsCard from './StatsCard';
 import RFPStatusCard from './RFPStatusCard';
-import { mockProposals, mockWinLossData, mockPipelineStages } from '@/data/mockDashboardData';
+import { getRfps } from '@/data/rfps';
 import RecentRFPs from './RecentRFPs';
-
-const chartConfig = {
-  wins: { label: "Wins", color: "#22c55e" },
-  losses: { label: "Losses", color: "#ef4444" },
-  value: { label: "Value", color: "#3b82f6" }
-};
+import { Skeleton } from '../ui/skeleton';
+import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
+import { AlertTriangle } from 'lucide-react';
 
 const OverviewTab = () => {
-  const totalProposals = mockProposals.length;
-  const totalValue = mockProposals.reduce((sum, p) => sum + p.value, 0);
-  const avgValue = totalValue / totalProposals;
-  const winRate = mockProposals.filter(p => p.status === 'won').length / totalProposals * 100;
+  const { data: rfps, isLoading, isError, error } = useQuery({
+    queryKey: ['rfps-dashboard'],
+    queryFn: getRfps
+  });
 
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <h3 className="text-xl font-semibold mb-4">Overview & Strategic Intelligence</h3>
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <Skeleton className="h-32" />
+          <Skeleton className="h-32" />
+          <Skeleton className="h-32" />
+          <Skeleton className="h-32" />
+        </div>
+        <div className="grid gap-6 md:grid-cols-2">
+          <Skeleton className="h-80" />
+          <Skeleton className="h-80" />
+        </div>
+        <Skeleton className="h-96" />
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <Alert variant="destructive">
+        <AlertTriangle className="h-4 w-4" />
+        <AlertTitle>Error loading dashboard data</AlertTitle>
+        <AlertDescription>{error.message}</AlertDescription>
+      </Alert>
+    );
+  }
+
+  const totalProposals = rfps?.length ?? 0;
+
+  const statusCounts = rfps?.reduce((acc, rfp) => {
+    acc[rfp.status] = (acc[rfp.status] || 0) + 1;
+    return acc;
+  }, {} as Record<string, number>) ?? {};
+  
   const statusData = [
-    { label: 'Draft', value: mockProposals.filter(p => p.status === 'draft').length, color: '#6b7280' },
-    { label: 'Submitted', value: mockProposals.filter(p => p.status === 'submitted').length, color: '#3b82f6' },
-    { label: 'Won', value: mockProposals.filter(p => p.status === 'won').length, color: '#22c55e' },
-    { label: 'Lost', value: mockProposals.filter(p => p.status === 'lost').length, color: '#ef4444' },
-    { label: 'Pending', value: mockProposals.filter(p => p.status === 'pending').length, color: '#f59e0b' }
+    { label: 'New', value: statusCounts['new'] || 0, color: '#3b82f6' },
+    { label: 'In Progress', value: statusCounts['in_progress'] || 0, color: '#f59e0b' },
+    { label: 'Submitted', value: statusCounts['submitted'] || 0, color: '#10b981' },
+    { label: 'Won', value: statusCounts['won'] || 0, color: '#22c55e' },
+    { label: 'Lost', value: statusCounts['lost'] || 0, color: '#ef4444' },
+    { label: 'Archived', value: statusCounts['archived'] || 0, color: '#6b7280' },
   ];
+  
+  const completedRfpsCount = (statusCounts['won'] || 0) + (statusCounts['lost'] || 0);
 
   return (
     <div className="space-y-6">
@@ -37,64 +73,47 @@ const OverviewTab = () => {
       {/* Key Metrics */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <StatsCard
-          title="Total Proposals"
+          title="Total RFPs"
           value={totalProposals}
-          description="Active proposals"
+          description="Active and archived RFPs"
           icon={<FileText className="h-4 w-4" />}
-          trend={{ value: 12, isPositive: true }}
         />
         <StatsCard
           title="Total Value"
-          value={`$${(totalValue / 1000).toFixed(0)}k`}
-          description="Pipeline value"
+          value="N/A"
+          description="Awaiting value data"
           icon={<DollarSign className="h-4 w-4" />}
-          trend={{ value: 8, isPositive: true }}
         />
         <StatsCard
           title="Win Rate"
-          value={`${winRate.toFixed(1)}%`}
-          description="Success rate"
+          value={completedRfpsCount > 0 ? `${((statusCounts['won'] || 0) / completedRfpsCount * 100).toFixed(1)}%` : 'N/A'}
+          description="Based on completed RFPs"
           icon={<Target className="h-4 w-4" />}
-          trend={{ value: 5, isPositive: true }}
         />
         <StatsCard
           title="Avg. Value"
-          value={`$${(avgValue / 1000).toFixed(0)}k`}
-          description="Per proposal"
+          value="N/A"
+          description="Awaiting value data"
           icon={<TrendingUp className="h-4 w-4" />}
-          trend={{ value: 3, isPositive: false }}
         />
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">
-        {/* Win/Loss Trends */}
-        <Card>
+        {/* Proposal Status */}
+        <RFPStatusCard
+          title="RFP Status"
+          total={totalProposals}
+          items={statusData}
+        />
+         <Card>
           <CardHeader>
             <CardTitle>Win/Loss Trends</CardTitle>
             <CardDescription>Monthly performance overview</CardDescription>
           </CardHeader>
-          <CardContent>
-            <ChartContainer config={chartConfig} className="h-[300px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={mockWinLossData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="period" />
-                  <YAxis />
-                  <ChartTooltip content={<ChartTooltipContent />} />
-                  <Bar dataKey="wins" fill="var(--color-wins)" />
-                  <Bar dataKey="losses" fill="var(--color-losses)" />
-                </BarChart>
-              </ResponsiveContainer>
-            </ChartContainer>
+          <CardContent className="flex items-center justify-center h-[300px]">
+            <p className="text-muted-foreground text-center">Historical data not yet available.<br />This chart will be populated as RFPs are completed.</p>
           </CardContent>
         </Card>
-
-        {/* Proposal Status */}
-        <RFPStatusCard
-          title="Proposal Status"
-          total={totalProposals}
-          items={statusData}
-        />
       </div>
 
       <RecentRFPs />
@@ -103,23 +122,10 @@ const OverviewTab = () => {
       <Card>
         <CardHeader>
           <CardTitle>Pipeline Overview</CardTitle>
-          <CardDescription>Proposals by stage</CardDescription>
+          <CardDescription>RFPs by stage</CardDescription>
         </CardHeader>
-        <CardContent>
-          <div className="grid gap-4 md:grid-cols-5">
-            {mockPipelineStages.map((stage, index) => (
-              <div key={index} className="text-center">
-                <div 
-                  className="w-full h-24 rounded-lg flex items-center justify-center text-white font-semibold mb-2"
-                  style={{ backgroundColor: stage.color }}
-                >
-                  {stage.count}
-                </div>
-                <p className="text-sm font-medium">{stage.name}</p>
-                <p className="text-xs text-muted-foreground">${(stage.value / 1000).toFixed(0)}k</p>
-              </div>
-            ))}
-          </div>
+        <CardContent className="flex items-center justify-center h-[150px]">
+          <p className="text-muted-foreground text-center">Pipeline data not yet available.<br />This requires mapping RFP statuses to pipeline stages.</p>
         </CardContent>
       </Card>
     </div>

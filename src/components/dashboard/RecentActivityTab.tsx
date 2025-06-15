@@ -1,10 +1,12 @@
-
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { FileText, Clock, TrendingUp, Users, AlertTriangle, CheckCircle, XCircle } from 'lucide-react';
-import { mockActivities, mockProposals } from '@/data/mockDashboardData';
+import { mockActivities } from '@/data/mockDashboardData';
+import { useQuery } from '@tanstack/react-query';
+import { getRfps } from '@/data/rfps';
+import { Skeleton } from '../ui/skeleton';
 
 const getActivityIcon = (type: string) => {
   switch (type) {
@@ -54,8 +56,13 @@ const formatTimeAgo = (timestamp: string) => {
 };
 
 const RecentActivityTab = () => {
-  const recentProposals = mockProposals
-    .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
+  const { data: rfps, isLoading: isLoadingRfps } = useQuery({
+    queryKey: ['rfps'],
+    queryFn: getRfps,
+  });
+
+  const recentRfps = (rfps ?? [])
+    .sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())
     .slice(0, 5);
 
   const todayActivities = mockActivities.filter(activity => {
@@ -72,10 +79,12 @@ const RecentActivityTab = () => {
         return <XCircle className="h-4 w-4 text-red-600" />;
       case 'submitted':
         return <Clock className="h-4 w-4 text-blue-600" />;
-      case 'draft':
+      case 'in_progress':
+        return <TrendingUp className="h-4 w-4 text-yellow-600" />;
+      case 'new':
         return <FileText className="h-4 w-4 text-gray-600" />;
-      case 'pending':
-        return <AlertTriangle className="h-4 w-4 text-yellow-600" />;
+      case 'archived':
+        return <FileText className="h-4 w-4 text-gray-500" />;
       default:
         return <FileText className="h-4 w-4" />;
     }
@@ -93,7 +102,7 @@ const RecentActivityTab = () => {
         <Card>
           <CardHeader>
             <CardTitle>Activity Feed</CardTitle>
-            <CardDescription>Latest system and user activities</CardDescription>
+            <CardDescription>Latest system and user activities (mock data)</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
@@ -127,33 +136,39 @@ const RecentActivityTab = () => {
         {/* Recent Proposals */}
         <Card>
           <CardHeader>
-            <CardTitle>Recent Proposals</CardTitle>
-            <CardDescription>Latest proposal updates and status changes</CardDescription>
+            <CardTitle>Recent RFP Updates</CardTitle>
+            <CardDescription>Latest RFP updates and status changes</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              {recentProposals.map((proposal) => (
-                <div key={proposal.id} className="flex items-center space-x-3 p-3 rounded-lg border">
-                  <div className="flex-shrink-0">
-                    {getStatusIcon(proposal.status)}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate">{proposal.title}</p>
-                    <p className="text-sm text-muted-foreground">{proposal.client}</p>
-                    <div className="flex items-center justify-between mt-1">
-                      <Badge variant="outline" className="text-xs">
-                        {proposal.status.charAt(0).toUpperCase() + proposal.status.slice(1)}
-                      </Badge>
-                      <p className="text-xs text-muted-foreground">
-                        ${(proposal.value / 1000).toFixed(0)}k
-                      </p>
-                    </div>
-                  </div>
+            {isLoadingRfps ? (
+                <div className="space-y-4">
+                    {[...Array(5)].map((_, i) => <Skeleton key={i} className="h-20 w-full" />)}
                 </div>
-              ))}
-            </div>
+            ) : (
+                <div className="space-y-4">
+                {recentRfps.length > 0 ? recentRfps.map((rfp) => (
+                    <div key={rfp.id} className="flex items-center space-x-3 p-3 rounded-lg border">
+                    <div className="flex-shrink-0">
+                        {getStatusIcon(rfp.status)}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium truncate">{rfp.title}</p>
+                        <p className="text-sm text-muted-foreground">{rfp.client_name}</p>
+                        <div className="flex items-center justify-between mt-1">
+                        <Badge variant="outline" className="text-xs capitalize">
+                            {rfp.status.replace(/_/g, ' ')}
+                        </Badge>
+                        <p className="text-xs text-muted-foreground">
+                            Updated {formatTimeAgo(rfp.updated_at)}
+                        </p>
+                        </div>
+                    </div>
+                    </div>
+                )) : <p className="text-muted-foreground text-center py-10">No recent RFP activity.</p>}
+                </div>
+            )}
             <Button variant="outline" className="w-full mt-4">
-              View All Proposals
+              View All RFPs
             </Button>
           </CardContent>
         </Card>
@@ -163,7 +178,7 @@ const RecentActivityTab = () => {
       <Card>
         <CardHeader>
           <CardTitle>Today's Summary</CardTitle>
-          <CardDescription>Key activities and metrics for today</CardDescription>
+          <CardDescription>Key activities and metrics for today (mock data)</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid gap-4 md:grid-cols-4">

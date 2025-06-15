@@ -1,38 +1,12 @@
-
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Calendar, Clock, AlertTriangle, CheckCircle, FileText, Users, Target } from 'lucide-react';
-import { mockDeadlines } from '@/data/mockDashboardData';
-
-const getPriorityColor = (priority: string) => {
-  switch (priority) {
-    case 'high':
-      return 'destructive';
-    case 'medium':
-      return 'default';
-    case 'low':
-      return 'secondary';
-    default:
-      return 'default';
-  }
-};
-
-const getTypeIcon = (type: string) => {
-  switch (type) {
-    case 'proposal':
-      return <FileText className="h-4 w-4" />;
-    case 'rfp':
-      return <Target className="h-4 w-4" />;
-    case 'meeting':
-      return <Users className="h-4 w-4" />;
-    case 'review':
-      return <CheckCircle className="h-4 w-4" />;
-    default:
-      return <Calendar className="h-4 w-4" />;
-  }
-};
+import { Calendar, Clock, AlertTriangle, Target, FileText, Users } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { getRfps } from '@/data/rfps';
+import { Skeleton } from '../ui/skeleton';
+import { Alert, AlertTitle, AlertDescription } from '../ui/alert';
 
 const getDaysUntilDeadline = (dueDate: string) => {
   const now = new Date();
@@ -61,10 +35,45 @@ const getUrgencyLevel = (daysUntil: number) => {
 };
 
 const UpcomingDeadlinesTab = () => {
-  const sortedDeadlines = mockDeadlines
+    const { data: rfps, isLoading, isError, error } = useQuery({
+        queryKey: ['rfps'],
+        queryFn: getRfps
+    });
+
+    if (isLoading) {
+        return (
+            <div className="space-y-6">
+                 <h3 className="text-xl font-semibold mb-4">Upcoming Deadlines</h3>
+                <div className="grid gap-4 md:grid-cols-4">
+                    <Skeleton className="h-28" />
+                    <Skeleton className="h-28" />
+                    <Skeleton className="h-28" />
+                    <Skeleton className="h-28" />
+                </div>
+                <div className="grid gap-6 md:grid-cols-2">
+                    <Skeleton className="h-[450px]" />
+                    <Skeleton className="h-[450px]" />
+                </div>
+            </div>
+        )
+    }
+
+    if (isError) {
+        return (
+            <Alert variant="destructive">
+                <AlertTriangle className="h-4 w-4" />
+                <AlertTitle>Error loading deadlines</AlertTitle>
+                <AlertDescription>{error.message}</AlertDescription>
+            </Alert>
+        );
+    }
+  
+  const deadlines = (rfps ?? []).filter(rfp => rfp.due_date);
+
+  const sortedDeadlines = deadlines
     .map(deadline => ({
       ...deadline,
-      daysUntil: getDaysUntilDeadline(deadline.dueDate)
+      daysUntil: getDaysUntilDeadline(deadline.due_date!)
     }))
     .sort((a, b) => a.daysUntil - b.daysUntil);
 
@@ -128,12 +137,12 @@ const UpcomingDeadlinesTab = () => {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Active</CardTitle>
+            <CardTitle className="text-sm font-medium">Total with Deadlines</CardTitle>
             <Target className="h-4 w-4 text-green-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">{mockDeadlines.length}</div>
-            <p className="text-xs text-muted-foreground">All deadlines</p>
+            <div className="text-2xl font-bold text-green-600">{deadlines.length}</div>
+            <p className="text-xs text-muted-foreground">All active deadlines</p>
           </CardContent>
         </Card>
       </div>
@@ -147,12 +156,12 @@ const UpcomingDeadlinesTab = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {sortedDeadlines.slice(0, 5).map((deadline) => {
+              {sortedDeadlines.length > 0 ? sortedDeadlines.slice(0, 5).map((deadline) => {
                 const urgency = getUrgencyLevel(deadline.daysUntil);
                 return (
                   <div key={deadline.id} className="flex items-center space-x-3 p-3 rounded-lg border">
                     <div className="flex-shrink-0">
-                      {getTypeIcon(deadline.type)}
+                      <FileText className="h-4 w-4" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between">
@@ -161,19 +170,19 @@ const UpcomingDeadlinesTab = () => {
                           {deadline.daysUntil < 0 ? 'Overdue' : `${deadline.daysUntil}d`}
                         </Badge>
                       </div>
-                      <p className="text-sm text-muted-foreground">{deadline.client}</p>
+                      <p className="text-sm text-muted-foreground">{deadline.client_name || 'N/A'}</p>
                       <div className="flex items-center justify-between mt-1">
-                        <Badge variant="outline" className="text-xs">
-                          {deadline.type.charAt(0).toUpperCase() + deadline.type.slice(1)}
+                         <Badge variant="outline" className="text-xs capitalize">
+                          {deadline.status.replace(/_/g, ' ')}
                         </Badge>
                         <p className="text-xs text-muted-foreground">
-                          {formatDeadlineDate(deadline.dueDate)}
+                          {formatDeadlineDate(deadline.due_date!)}
                         </p>
                       </div>
                     </div>
                   </div>
                 );
-              })}
+              }) : <p className="text-muted-foreground text-center py-10">No upcoming deadlines.</p>}
             </div>
             <Button variant="outline" className="w-full mt-4">
               View All Deadlines
@@ -187,21 +196,8 @@ const UpcomingDeadlinesTab = () => {
             <CardTitle>This Week</CardTitle>
             <CardDescription>Weekly deadline overview</CardDescription>
           </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {weeklyView.map((day, index) => (
-                <div key={index} className="flex items-center justify-between p-3 rounded-lg border">
-                  <div>
-                    <p className="font-medium">{day.day}</p>
-                    <p className="text-sm text-muted-foreground">{day.date}</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-lg font-bold">{day.deadlines}</p>
-                    <p className="text-xs text-muted-foreground">deadlines</p>
-                  </div>
-                </div>
-              ))}
-            </div>
+          <CardContent className="flex items-center justify-center h-[300px]">
+            <p className="text-muted-foreground text-center">Calendar view not yet available.<br />This requires grouping RFPs by day.</p>
           </CardContent>
         </Card>
       </div>
