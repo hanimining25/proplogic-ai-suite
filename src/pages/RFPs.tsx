@@ -1,15 +1,15 @@
-
-import React from "react";
+import React, { useState, useMemo } from "react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { getRfps } from "@/data/rfps";
 import { RFPsTable } from "@/components/rfps/RFPsTable";
 import { Button } from "@/components/ui/button";
-import { PlusCircle, AlertTriangle } from "lucide-react";
+import { PlusCircle, AlertTriangle, Search } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { RFPFilters } from "@/components/rfps/RFPFilters";
 
 // RFPs tabs configuration
 const rfpTabs = [
@@ -27,10 +27,26 @@ const RFPs = () => {
   const location = useLocation();
   const currentPath = location.pathname;
 
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+
   const { data: rfps, isLoading, isError, error } = useQuery({
     queryKey: ['rfps'],
     queryFn: getRfps
   });
+
+  const filteredRfps = useMemo(() => {
+    if (!rfps) return [];
+    return rfps.filter(rfp => {
+      const searchTermMatch = searchTerm.trim() === '' ||
+        rfp.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (rfp.client_name && rfp.client_name.toLowerCase().includes(searchTerm.toLowerCase()));
+      
+      const statusMatch = statusFilter === 'all' || rfp.status === statusFilter;
+
+      return searchTermMatch && statusMatch;
+    });
+  }, [rfps, searchTerm, statusFilter]);
   
   // Determine active tab based on current path
   const getActiveTab = () => {
@@ -84,10 +100,24 @@ const RFPs = () => {
       <Card>
         <CardHeader>
           <CardTitle>All Uploaded RFPs</CardTitle>
-          <CardDescription>Browse and manage all RFPs in the system.</CardDescription>
+          <CardDescription>Browse and manage all RFPs in the system. Use the filters below to narrow your search.</CardDescription>
         </CardHeader>
         <CardContent>
-          <RFPsTable rfps={rfps} />
+          <RFPFilters
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+            statusFilter={statusFilter}
+            setStatusFilter={setStatusFilter}
+          />
+          {filteredRfps && filteredRfps.length > 0 ? (
+            <RFPsTable rfps={filteredRfps} />
+          ) : (
+            <div className="flex flex-col items-center justify-center text-center py-10 border rounded-lg">
+              <Search className="h-12 w-12 text-muted-foreground mb-4" />
+              <h3 className="text-xl font-semibold mb-2">No RFPs Match Your Criteria</h3>
+              <p className="text-muted-foreground">Try adjusting your search term or status filter.</p>
+            </div>
+          )}
         </CardContent>
       </Card>
     );
