@@ -90,6 +90,56 @@ export type Database = {
         }
         Relationships: []
       }
+      rfps: {
+        Row: {
+          client_name: string | null
+          created_at: string
+          document_url: string | null
+          due_date: string | null
+          id: string
+          org_id: string
+          relevance_score: number | null
+          status: Database["public"]["Enums"]["rfp_status"]
+          summary: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          client_name?: string | null
+          created_at?: string
+          document_url?: string | null
+          due_date?: string | null
+          id?: string
+          org_id: string
+          relevance_score?: number | null
+          status?: Database["public"]["Enums"]["rfp_status"]
+          summary?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          client_name?: string | null
+          created_at?: string
+          document_url?: string | null
+          due_date?: string | null
+          id?: string
+          org_id?: string
+          relevance_score?: number | null
+          status?: Database["public"]["Enums"]["rfp_status"]
+          summary?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rfps_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -97,6 +147,10 @@ export type Database = {
     Functions: {
       create_organization_and_admin: {
         Args: { org_name: string }
+        Returns: string
+      }
+      get_my_org_id: {
+        Args: Record<PropertyKey, never>
         Returns: string
       }
     }
@@ -108,6 +162,13 @@ export type Database = {
         | "crm_manager"
         | "finance"
         | "executive"
+      rfp_status:
+        | "new"
+        | "in_progress"
+        | "submitted"
+        | "won"
+        | "lost"
+        | "archived"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -230,6 +291,14 @@ export const Constants = {
         "crm_manager",
         "finance",
         "executive",
+      ],
+      rfp_status: [
+        "new",
+        "in_progress",
+        "submitted",
+        "won",
+        "lost",
+        "archived",
       ],
     },
   },

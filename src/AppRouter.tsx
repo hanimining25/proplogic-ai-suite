@@ -13,6 +13,7 @@ import RFPs from "./pages/RFPs";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 import Index from "./pages/Index";
+import NewRFPPage from "./pages/NewRFPPage";
 
 const router = createBrowserRouter([
   {
@@ -46,6 +47,10 @@ const router = createBrowserRouter([
       {
         path: "rfps",
         element: <RFPs />,
+      },
+      {
+        path: "rfps/new",
+        element: <NewRFPPage />,
       },
       {
         path: "settings",
