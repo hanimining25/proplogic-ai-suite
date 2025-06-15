@@ -10,12 +10,29 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface HeaderProps {
   toggleSidebar: () => void;
 }
 
 const Header = ({ toggleSidebar }: HeaderProps) => {
+  const { user, signOut } = useAuth();
+
+  const handleLogout = async () => {
+    await signOut();
+  };
+
+  const userName =
+    user?.user_metadata?.first_name && user?.user_metadata?.last_name
+      ? `${user.user_metadata.first_name} ${user.user_metadata.last_name}`
+      : user?.email || "User";
+
+  const userInitials =
+    user?.user_metadata?.first_name && user?.user_metadata?.last_name
+      ? `${user.user_metadata.first_name[0]}${user.user_metadata.last_name[0]}`
+      : user?.email?.[0].toUpperCase() || <User size={16} />;
+
   return (
     <header className="h-16 border-b flex items-center justify-between px-4 bg-background/95 backdrop-blur-sm sticky top-0 z-10">
       <div className="flex items-center">
@@ -47,11 +64,11 @@ const Header = ({ toggleSidebar }: HeaderProps) => {
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="flex items-center space-x-2">
-              <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground">
-                <User size={16} />
+              <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-semibold">
+                {userInitials}
               </div>
               <div className="hidden md:block text-left">
-                <p className="text-sm font-medium">John Doe</p>
+                <p className="text-sm font-medium">{userName}</p>
                 <p className="text-xs text-muted-foreground">Admin</p>
               </div>
               <ChevronDown size={14} className="hidden md:block" />
@@ -64,7 +81,7 @@ const Header = ({ toggleSidebar }: HeaderProps) => {
             <DropdownMenuItem>Settings</DropdownMenuItem>
             <DropdownMenuItem>Billing</DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>Log out</DropdownMenuItem>
+            <DropdownMenuItem onSelect={handleLogout}>Log out</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
