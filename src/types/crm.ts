@@ -1,3 +1,4 @@
+
 import { Tables } from '@/integrations/supabase/types';
 
 export type Client = Tables<'clients'>;
@@ -15,7 +16,7 @@ export interface ClientHealth {
   satisfactionScore: number;
   revenueScore: number;
   riskLevel: 'low' | 'medium' | 'high';
-  lastUpdated: Date;
+  lastUpdated: string;
   factors: {
     name: string;
     score: number;
@@ -40,7 +41,7 @@ export interface ClientInsight {
   satisfaction: {
     score: number;
     trend: 'up' | 'down' | 'stable';
-    lastSurvey: Date;
+    lastSurvey: string;
   };
   opportunities: {
     active: number;

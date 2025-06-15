@@ -366,7 +366,7 @@ export const mockClientInsights: ClientInsight[] = [
     satisfaction: {
       score: 88,
       trend: 'up',
-      lastSurvey: new Date('2024-04-15')
+      lastSurvey: new Date('2024-04-15').toISOString()
     },
     opportunities: {
       active: 2,
@@ -392,7 +392,7 @@ export const mockClientInsights: ClientInsight[] = [
     satisfaction: {
       score: 75,
       trend: 'stable',
-      lastSurvey: new Date('2024-03-20')
+      lastSurvey: new Date('2024-03-20').toISOString()
     },
     opportunities: {
       active: 1,

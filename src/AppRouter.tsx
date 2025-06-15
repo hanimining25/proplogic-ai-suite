@@ -37,7 +37,7 @@ const router = createBrowserRouter([
         element: <Dashboard />,
       },
       {
-        path: "crm",
+        path: "crm/*",
         element: <CRM />,
       },
       {
