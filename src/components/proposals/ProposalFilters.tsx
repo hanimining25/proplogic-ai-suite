@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -38,9 +37,9 @@ export const ProposalFilters: React.FC<ProposalFiltersProps> = ({
             <SelectItem value="all">All Statuses</SelectItem>
             <SelectItem value="draft">Draft</SelectItem>
             <SelectItem value="submitted">Submitted</SelectItem>
+            <SelectItem value="pending">Pending</SelectItem>
             <SelectItem value="won">Won</SelectItem>
             <SelectItem value="lost">Lost</SelectItem>
-            <SelectItem value="archived">Archived</SelectItem>
           </SelectContent>
         </Select>
       </div>

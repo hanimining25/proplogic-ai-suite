@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Proposal } from '@/types/dashboard';
 import {
@@ -26,9 +25,9 @@ const formatCurrency = (value: number) => {
 const statusVariantMap: { [key in Proposal['status']]: 'default' | 'secondary' | 'destructive' | 'outline' } = {
     draft: 'secondary',
     submitted: 'default',
+    pending: 'default',
     won: 'outline',
     lost: 'destructive',
-    archived: 'outline',
 };
 
 const wonClass = 'border-green-600 bg-green-50 text-green-700 hover:bg-green-100 dark:border-green-500 dark:bg-green-950 dark:text-green-400';
