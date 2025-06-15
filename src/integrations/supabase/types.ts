@@ -95,7 +95,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      create_organization_and_admin: {
+        Args: { org_name: string }
+        Returns: string
+      }
     }
     Enums: {
       app_role:

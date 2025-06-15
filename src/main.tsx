@@ -1,8 +1,12 @@
 
 import React from 'react';
 import { createRoot } from 'react-dom/client';
-import App from './App.tsx';
+import AppRouter from './AppRouter.tsx';
 import './index.css';
+import { AuthProvider } from './contexts/AuthContext.tsx';
+import { ThemeProvider } from "@/components/theme-provider";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { Toaster } from "@/components/ui/sonner";
 
 const container = document.getElementById('root');
 if (!container) {
@@ -12,6 +16,13 @@ if (!container) {
 const root = createRoot(container);
 root.render(
   <React.StrictMode>
-    <App />
+    <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
+      <TooltipProvider>
+        <Toaster />
+        <AuthProvider>
+          <AppRouter />
+        </AuthProvider>
+      </TooltipProvider>
+    </ThemeProvider>
   </React.StrictMode>
 );
