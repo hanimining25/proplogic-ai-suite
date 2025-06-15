@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getRfpById, deleteRfp, updateRfpStatus } from '@/data/rfps';
+import { Tables } from '@/integrations/supabase/types';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { AlertTriangle, ArrowLeft, Calendar, FileText, User, Tag, CheckCircle, XCircle, MoreVertical, Edit, Trash2 } from 'lucide-react';
@@ -88,7 +89,7 @@ const RFPDetailPage = () => {
 
   const handleStatusChange = (status: string) => {
     if (id && status !== rfp?.status) {
-      updateStatusMutation.mutate({ id, status });
+      updateStatusMutation.mutate({ id, status: status as Tables<'rfps'>['status'] });
     }
   };
 

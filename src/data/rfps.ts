@@ -1,5 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
-import { TablesInsert } from '@/integrations/supabase/types';
+import { Tables, TablesInsert } from '@/integrations/supabase/types';
 import { toast } from 'sonner';
 import * as z from 'zod';
 
@@ -105,7 +105,7 @@ export const deleteRfp = async (id: string) => {
   return { success: true };
 };
 
-export const updateRfpStatus = async ({ id, status }: { id: string, status: string }) => {
+export const updateRfpStatus = async ({ id, status }: { id: string, status: Tables<'rfps'>['status'] }) => {
   const { data, error } = await supabase
     .from('rfps')
     .update({ status })

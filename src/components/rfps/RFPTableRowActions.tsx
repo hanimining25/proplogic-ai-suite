@@ -72,7 +72,7 @@ export function RFPTableRowActions({ rfp }: RFPTableRowActionsProps) {
 
   const handleStatusChange = (status: string) => {
     if (status !== rfp.status) {
-        updateStatusMutation.mutate({ id: rfp.id, status });
+        updateStatusMutation.mutate({ id: rfp.id, status: status as Tables<'rfps'>['status'] });
     }
   };
 
