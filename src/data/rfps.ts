@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { TablesInsert } from '@/integrations/supabase/types';
 import { toast } from 'sonner';
@@ -74,4 +73,20 @@ export const createRfp = async (values: NewRFPFormValues, file: File | null) => 
     }
 
     return data;
+};
+
+export const getRfpById = async (id: string) => {
+  const { data, error } = await supabase
+    .from('rfps')
+    .select('*')
+    .eq('id', id)
+    .single();
+
+  if (error) {
+    console.error(`Error fetching RFP with id ${id}:`, error);
+    toast.error("Failed to fetch RFP details", { description: error.message });
+    throw error;
+  }
+
+  return data;
 };

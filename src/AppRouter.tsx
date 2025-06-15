@@ -1,4 +1,3 @@
-
 import {
   createBrowserRouter,
   RouterProvider,
@@ -14,6 +13,7 @@ import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 import Index from "./pages/Index";
 import NewRFPPage from "./pages/NewRFPPage";
+import RFPDetailPage from "./pages/RFPDetailPage";
 
 const router = createBrowserRouter([
   {
@@ -51,6 +51,10 @@ const router = createBrowserRouter([
       {
         path: "rfps/new",
         element: <NewRFPPage />,
+      },
+      {
+        path: "rfps/:id",
+        element: <RFPDetailPage />,
       },
       {
         path: "settings",

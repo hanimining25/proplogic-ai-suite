@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { Tables } from '@/integrations/supabase/types';
 import { format } from 'date-fns';
+import { useNavigate } from 'react-router-dom';
 
 type RFP = Tables<'rfps'>;
 
@@ -27,6 +28,12 @@ const capitalize = (s: string) => {
 };
 
 export const RFPsTable = ({ rfps }: RFPsTableProps) => {
+  const navigate = useNavigate();
+
+  const handleRowClick = (id: string) => {
+    navigate(`/rfps/${id}`);
+  };
+
   return (
     <div className="border rounded-lg overflow-hidden">
       <Table>
@@ -42,7 +49,11 @@ export const RFPsTable = ({ rfps }: RFPsTableProps) => {
         <TableBody>
           {rfps && rfps.length > 0 ? (
             rfps.map((rfp) => (
-              <TableRow key={rfp.id}>
+              <TableRow
+                key={rfp.id}
+                onClick={() => handleRowClick(rfp.id)}
+                className="cursor-pointer hover:bg-muted/50"
+              >
                 <TableCell className="font-medium">{rfp.title}</TableCell>
                 <TableCell>{rfp.client_name || 'N/A'}</TableCell>
                 <TableCell className="hidden md:table-cell">
