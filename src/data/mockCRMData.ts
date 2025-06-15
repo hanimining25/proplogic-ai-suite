@@ -315,7 +315,8 @@ export const mockOpportunities: Opportunity[] = [
     updated_at: new Date('2024-05-20').toISOString(),
     team_member: 'Alice Cooper',
     tags: ['upsell', 'analytics'],
-    notes: 'Client very interested, waiting for budget approval.'
+    notes: 'Client very interested, waiting for budget approval.',
+    clients: { name: 'TechCorp Solutions' }
   },
   {
     id: '2',
@@ -330,7 +331,8 @@ export const mockOpportunities: Opportunity[] = [
     updated_at: new Date('2024-05-18').toISOString(),
     team_member: 'Carol Smith',
     tags: ['expansion', 'manufacturing'],
-    notes: 'In final negotiations on pricing and implementation timeline.'
+    notes: 'In final negotiations on pricing and implementation timeline.',
+    clients: { name: 'Global Manufacturing Inc' }
   },
   {
     id: '3',
@@ -345,7 +347,8 @@ export const mockOpportunities: Opportunity[] = [
     updated_at: new Date('2024-05-15').toISOString(),
     team_member: 'Eva Martinez',
     tags: ['new-business', 'finance'],
-    notes: 'Still in early stages, competing with two other vendors.'
+    notes: 'Still in early stages, competing with two other vendors.',
+    clients: { name: 'FinanceFlow Partners' }
   }
 ];
 
