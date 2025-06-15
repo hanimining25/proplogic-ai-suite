@@ -1,12 +1,11 @@
 
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { createRfp, NewRFPFormValues } from '@/data/rfps';
+import { createRfp, NewRFPFormValues, newRfpFormSchema } from '@/data/rfps';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 import { Calendar } from '@/components/ui/calendar';
@@ -16,19 +15,13 @@ import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
 
-const formSchema = z.object({
-  title: z.string().min(1, 'Title is required'),
-  client_name: z.string().optional(),
-  due_date: z.date().optional(),
-});
-
 export const NewRFPForm = () => {
   const [file, setFile] = useState<File | null>(null);
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<NewRFPFormValues>({
+    resolver: zodResolver(newRfpFormSchema),
     defaultValues: {
       title: '',
       client_name: '',
@@ -49,7 +42,7 @@ export const NewRFPForm = () => {
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  function onSubmit(values: NewRFPFormValues) {
     mutation.mutate(values);
   }
 

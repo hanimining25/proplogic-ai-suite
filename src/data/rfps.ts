@@ -2,12 +2,15 @@
 import { supabase } from '@/integrations/supabase/client';
 import { TablesInsert } from '@/integrations/supabase/types';
 import { toast } from 'sonner';
+import * as z from 'zod';
 
-export type NewRFPFormValues = {
-  title: string;
-  client_name?: string;
-  due_date?: Date;
-}
+export const newRfpFormSchema = z.object({
+  title: z.string().min(1, 'Title is required'),
+  client_name: z.string().optional(),
+  due_date: z.date().optional(),
+});
+
+export type NewRFPFormValues = z.infer<typeof newRfpFormSchema>;
 
 export const getRfps = async () => {
   const { data, error } = await supabase
