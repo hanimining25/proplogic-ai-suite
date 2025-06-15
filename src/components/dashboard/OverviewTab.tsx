@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
@@ -7,6 +6,7 @@ import { TrendingUp, DollarSign, FileText, Users, Target, Clock } from 'lucide-r
 import StatsCard from './StatsCard';
 import RFPStatusCard from './RFPStatusCard';
 import { mockProposals, mockWinLossData, mockPipelineStages } from '@/data/mockDashboardData';
+import RecentRFPs from './RecentRFPs';
 
 const chartConfig = {
   wins: { label: "Wins", color: "#22c55e" },
@@ -96,6 +96,8 @@ const OverviewTab = () => {
           items={statusData}
         />
       </div>
+
+      <RecentRFPs />
 
       {/* Pipeline Overview */}
       <Card>

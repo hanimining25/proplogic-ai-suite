@@ -1,12 +1,19 @@
 
 import React from "react";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useNavigate, useLocation } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { getRfps } from "@/data/rfps";
+import { RFPsTable } from "@/components/rfps/RFPsTable";
+import { Button } from "@/components/ui/button";
+import { PlusCircle, AlertTriangle } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 // RFPs tabs configuration
 const rfpTabs = [
-  { value: "overview", label: "Discover RFPs", path: "/rfps" },
-  { value: "uploaded", label: "Uploaded RFPs", path: "/rfps/uploaded" },
+  { value: "overview", label: "Uploaded RFPs", path: "/rfps" },
   { value: "relevance", label: "AI Relevance Score", path: "/rfps/relevance" },
   { value: "details", label: "RFP Details & SoW", path: "/rfps/details" },
   { value: "documents", label: "Supporting Documents", path: "/rfps/documents" },
@@ -19,6 +26,11 @@ const RFPs = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const currentPath = location.pathname;
+
+  const { data: rfps, isLoading, isError, error } = useQuery({
+    queryKey: ['rfps'],
+    queryFn: getRfps
+  });
   
   // Determine active tab based on current path
   const getActiveTab = () => {
@@ -33,13 +45,67 @@ const RFPs = () => {
     }
   };
 
+  const renderContent = () => {
+    if (isLoading) {
+      return (
+        <Card>
+          <CardHeader>
+            <Skeleton className="h-6 w-1/4" />
+            <Skeleton className="h-4 w-1/2" />
+          </CardHeader>
+          <CardContent>
+            <Skeleton className="h-[200px] w-full" />
+          </CardContent>
+        </Card>
+      );
+    }
+    if (isError) {
+      return (
+        <Alert variant="destructive">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertTitle>Error fetching RFPs</AlertTitle>
+          <AlertDescription>{error.message}</AlertDescription>
+        </Alert>
+      );
+    }
+    if (!rfps || rfps.length === 0) {
+      return (
+        <div className="text-center py-10 border rounded-lg">
+          <h3 className="text-xl font-semibold mb-2">No RFPs found</h3>
+          <p className="text-muted-foreground mb-4">Get started by submitting a new RFP.</p>
+          <Button onClick={() => navigate('/rfps/new')}>
+            <PlusCircle className="mr-2 h-4 w-4" />
+            Submit New RFP
+          </Button>
+        </div>
+      );
+    }
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>All Uploaded RFPs</CardTitle>
+          <CardDescription>Browse and manage all RFPs in the system.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <RFPsTable rfps={rfps} />
+        </CardContent>
+      </Card>
+    );
+  };
+
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-3xl font-bold tracking-tight">RFPs</h2>
-        <p className="text-muted-foreground">
-          RFP discovery, ingestion & analysis.
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-3xl font-bold tracking-tight">RFPs</h2>
+          <p className="text-muted-foreground">
+            RFP discovery, ingestion & analysis.
+          </p>
+        </div>
+        <Button onClick={() => navigate('/rfps/new')}>
+          <PlusCircle className="mr-2 h-4 w-4" />
+          New RFP
+        </Button>
       </div>
 
       <Tabs value={getActiveTab()} onValueChange={handleTabChange} className="w-full">
@@ -53,13 +119,7 @@ const RFPs = () => {
         
         <div className="mt-6">
           {currentPath === "/rfps" && (
-            <div>
-              <h3 className="text-xl font-semibold mb-4">Discover RFPs</h3>
-              <div className="grid gap-4">
-                <p>Find and discover new RFP opportunities.</p>
-                {/* Original RFPs content */}
-              </div>
-            </div>
+            renderContent()
           )}
           {/* The other tab content will be shown through routing */}
         </div>
