@@ -1,16 +1,19 @@
 import React from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { TrendingUp, TrendingDown, Users, DollarSign, Calendar, Target, AlertTriangle, CheckCircle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from 'recharts';
-import { mockClientInsights, mockClients } from '@/data/mockCRMData';
+import { getClientInsights, ClientInsightWithClientName } from '@/data/clientInsights';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 const ClientInsightsTab = () => {
-  const insightsWithClients = mockClientInsights.map(insight => ({
-    ...insight,
-    clientName: mockClients.find(c => c.id === insight.clientId)?.name || 'Unknown'
-  }));
+  const { data: insightsWithClients, isLoading, isError, error } = useQuery({
+    queryKey: ['clientInsights'],
+    queryFn: getClientInsights,
+  });
 
   // Chart configurations
   const chartConfig = {
@@ -77,10 +80,49 @@ const ClientInsightsTab = () => {
     }).format(new Date(dateString));
   };
 
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-24" />)}
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <Skeleton className="h-80" />
+          <Skeleton className="h-80" />
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <Skeleton className="h-96" />
+          <Skeleton className="h-96" />
+        </div>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <Alert variant="destructive">
+        <AlertTriangle className="h-4 w-4" />
+        <AlertTitle>Error fetching client insights</AlertTitle>
+        <AlertDescription>{error?.message}</AlertDescription>
+      </Alert>
+    );
+  }
+  
+  if (!insightsWithClients || insightsWithClients.length === 0) {
+    return (
+      <Card>
+        <CardContent className="p-6 text-center text-muted-foreground">
+          <h3 className="text-lg font-semibold">No Client Insights Found</h3>
+          <p>Client insights will be generated and displayed here as data becomes available.</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
   // Overall stats
   const totalRevenue = insightsWithClients.reduce((sum, insight) => sum + insight.revenue.current, 0);
-  const avgGrowth = insightsWithClients.reduce((sum, insight) => sum + insight.revenue.growth, 0) / insightsWithClients.length;
-  const avgSatisfaction = insightsWithClients.reduce((sum, insight) => sum + insight.satisfaction.score, 0) / insightsWithClients.length;
+  const avgGrowth = insightsWithClients.length > 0 ? insightsWithClients.reduce((sum, insight) => sum + insight.revenue.growth, 0) / insightsWithClients.length : 0;
+  const avgSatisfaction = insightsWithClients.length > 0 ? insightsWithClients.reduce((sum, insight) => sum + insight.satisfaction.score, 0) / insightsWithClients.length : 0;
   const totalOpportunities = insightsWithClients.reduce((sum, insight) => sum + insight.opportunities.totalValue, 0);
 
   return (
@@ -160,7 +202,7 @@ const ClientInsightsTab = () => {
       {/* Client Insights Cards */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {insightsWithClients.map((insight) => (
-          <Card key={insight.clientId}>
+          <Card key={insight.id}>
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
                 <span>{insight.clientName}</span>

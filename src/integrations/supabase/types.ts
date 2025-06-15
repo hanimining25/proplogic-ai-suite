@@ -9,6 +9,91 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      activities: {
+        Row: {
+          description: string | null
+          id: string
+          org_id: string
+          priority: Database["public"]["Enums"]["activity_priority"]
+          timestamp: string
+          title: string
+          type: Database["public"]["Enums"]["dashboard_activity_type"]
+          user_name: string | null
+        }
+        Insert: {
+          description?: string | null
+          id?: string
+          org_id: string
+          priority?: Database["public"]["Enums"]["activity_priority"]
+          timestamp?: string
+          title: string
+          type: Database["public"]["Enums"]["dashboard_activity_type"]
+          user_name?: string | null
+        }
+        Update: {
+          description?: string | null
+          id?: string
+          org_id?: string
+          priority?: Database["public"]["Enums"]["activity_priority"]
+          timestamp?: string
+          title?: string
+          type?: Database["public"]["Enums"]["dashboard_activity_type"]
+          user_name?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activities_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_insights: {
+        Row: {
+          actionable: boolean
+          confidence: number | null
+          created_at: string
+          description: string | null
+          id: string
+          org_id: string
+          priority: Database["public"]["Enums"]["activity_priority"]
+          title: string
+          type: Database["public"]["Enums"]["insight_type"]
+        }
+        Insert: {
+          actionable?: boolean
+          confidence?: number | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          org_id: string
+          priority?: Database["public"]["Enums"]["activity_priority"]
+          title: string
+          type: Database["public"]["Enums"]["insight_type"]
+        }
+        Update: {
+          actionable?: boolean
+          confidence?: number | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          org_id?: string
+          priority?: Database["public"]["Enums"]["activity_priority"]
+          title?: string
+          type?: Database["public"]["Enums"]["insight_type"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_insights_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       client_activities: {
         Row: {
           client_id: string
@@ -68,6 +153,117 @@ export type Database = {
             columns: ["contact_id"]
             isOneToOne: false
             referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      client_health: {
+        Row: {
+          client_id: string
+          engagement_score: number | null
+          factors: Json | null
+          id: string
+          last_updated: string | null
+          org_id: string
+          overall_score: number | null
+          recommendations: Json | null
+          revenue_score: number | null
+          risk_level: Database["public"]["Enums"]["client_risk_level"] | null
+          satisfaction_score: number | null
+        }
+        Insert: {
+          client_id: string
+          engagement_score?: number | null
+          factors?: Json | null
+          id?: string
+          last_updated?: string | null
+          org_id: string
+          overall_score?: number | null
+          recommendations?: Json | null
+          revenue_score?: number | null
+          risk_level?: Database["public"]["Enums"]["client_risk_level"] | null
+          satisfaction_score?: number | null
+        }
+        Update: {
+          client_id?: string
+          engagement_score?: number | null
+          factors?: Json | null
+          id?: string
+          last_updated?: string | null
+          org_id?: string
+          overall_score?: number | null
+          recommendations?: Json | null
+          revenue_score?: number | null
+          risk_level?: Database["public"]["Enums"]["client_risk_level"] | null
+          satisfaction_score?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_health_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: true
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_health_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      client_insights: {
+        Row: {
+          client_id: string
+          engagement: Json | null
+          id: string
+          last_updated: string
+          opportunities: Json | null
+          org_id: string
+          revenue: Json | null
+          risks: Json | null
+          satisfaction: Json | null
+          strengths: Json | null
+        }
+        Insert: {
+          client_id: string
+          engagement?: Json | null
+          id?: string
+          last_updated?: string
+          opportunities?: Json | null
+          org_id: string
+          revenue?: Json | null
+          risks?: Json | null
+          satisfaction?: Json | null
+          strengths?: Json | null
+        }
+        Update: {
+          client_id?: string
+          engagement?: Json | null
+          id?: string
+          last_updated?: string
+          opportunities?: Json | null
+          org_id?: string
+          revenue?: Json | null
+          risks?: Json | null
+          satisfaction?: Json | null
+          strengths?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_insights_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: true
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_insights_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
         ]
@@ -342,6 +538,70 @@ export type Database = {
         }
         Relationships: []
       }
+      proposals: {
+        Row: {
+          client_id: string | null
+          created_at: string
+          deadline: string | null
+          id: string
+          org_id: string
+          probability: number | null
+          rfp_id: string | null
+          status: Database["public"]["Enums"]["proposal_status"]
+          title: string
+          updated_at: string
+          value: number | null
+        }
+        Insert: {
+          client_id?: string | null
+          created_at?: string
+          deadline?: string | null
+          id?: string
+          org_id: string
+          probability?: number | null
+          rfp_id?: string | null
+          status?: Database["public"]["Enums"]["proposal_status"]
+          title: string
+          updated_at?: string
+          value?: number | null
+        }
+        Update: {
+          client_id?: string | null
+          created_at?: string
+          deadline?: string | null
+          id?: string
+          org_id?: string
+          probability?: number | null
+          rfp_id?: string | null
+          status?: Database["public"]["Enums"]["proposal_status"]
+          title?: string
+          updated_at?: string
+          value?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "proposals_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "proposals_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "proposals_rfp_id_fkey"
+            columns: ["rfp_id"]
+            isOneToOne: false
+            referencedRelation: "rfps"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       rfps: {
         Row: {
           client_id: string | null
@@ -417,6 +677,7 @@ export type Database = {
       }
     }
     Enums: {
+      activity_priority: "high" | "medium" | "low"
       activity_type:
         | "meeting"
         | "call"
@@ -431,15 +692,30 @@ export type Database = {
         | "crm_manager"
         | "finance"
         | "executive"
+      client_risk_level: "low" | "medium" | "high"
       client_status: "active" | "inactive" | "prospect"
       comm_preference: "email" | "phone" | "linkedin" | "in-person"
       contact_role: "primary" | "secondary" | "stakeholder"
+      dashboard_activity_type:
+        | "proposal_created"
+        | "deadline_approaching"
+        | "status_changed"
+        | "rfp_discovered"
+        | "ai_suggestion"
+      insight_type: "opportunity" | "risk" | "optimization"
       opportunity_stage:
         | "discovery"
         | "proposal"
         | "negotiation"
         | "closed-won"
         | "closed-lost"
+      proposal_status:
+        | "draft"
+        | "submitted"
+        | "pending"
+        | "won"
+        | "lost"
+        | "archived"
       rfp_status:
         | "new"
         | "in_progress"
@@ -562,6 +838,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      activity_priority: ["high", "medium", "low"],
       activity_type: [
         "meeting",
         "call",
@@ -578,15 +855,32 @@ export const Constants = {
         "finance",
         "executive",
       ],
+      client_risk_level: ["low", "medium", "high"],
       client_status: ["active", "inactive", "prospect"],
       comm_preference: ["email", "phone", "linkedin", "in-person"],
       contact_role: ["primary", "secondary", "stakeholder"],
+      dashboard_activity_type: [
+        "proposal_created",
+        "deadline_approaching",
+        "status_changed",
+        "rfp_discovered",
+        "ai_suggestion",
+      ],
+      insight_type: ["opportunity", "risk", "optimization"],
       opportunity_stage: [
         "discovery",
         "proposal",
         "negotiation",
         "closed-won",
         "closed-lost",
+      ],
+      proposal_status: [
+        "draft",
+        "submitted",
+        "pending",
+        "won",
+        "lost",
+        "archived",
       ],
       rfp_status: [
         "new",
