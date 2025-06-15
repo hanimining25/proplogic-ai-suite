@@ -38,7 +38,6 @@ const App: React.FC = () => {
               
               {/* CRM routes - all handled within CRM component */}
               <Route path="/crm" element={<Layout><CRM /></Layout>} />
-              <Route path="/crm/clients" element={<Layout><CRM /></Layout>} />
               <Route path="/crm/contacts" element={<Layout><CRM /></Layout>} />
               <Route path="/crm/timeline" element={<Layout><CRM /></Layout>} />
               <Route path="/crm/health" element={<Layout><CRM /></Layout>} />
