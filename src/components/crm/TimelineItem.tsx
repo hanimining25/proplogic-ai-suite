@@ -1,12 +1,17 @@
-
 import React from 'react';
 import { Calendar, User, Building, MessageSquare, Phone, Mail, FileText, FileCheck, StickyNote } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ClientActivity } from '@/types/crm';
+import { ActivityWithDetails } from '@/data/activities';
+
+type ActivityForTimeline = Omit<ActivityWithDetails, 'date'> & { 
+  date: Date; 
+  clientName: string; 
+  contactName: string | null;
+};
 
 interface TimelineItemProps {
-  activity: ClientActivity & { clientName: string; contactName: string | null };
+  activity: ActivityForTimeline;
   isLast: boolean;
 }
 
@@ -84,7 +89,7 @@ const TimelineItem: React.FC<TimelineItemProps> = ({ activity, isLast }) => {
                 </div>
                 <div className="flex items-center space-x-1">
                   <User className="h-3 w-3" />
-                  <span>{activity.teamMember}</span>
+                  <span>{activity.team_member}</span>
                 </div>
               </div>
             </div>
@@ -109,14 +114,14 @@ const TimelineItem: React.FC<TimelineItemProps> = ({ activity, isLast }) => {
             </div>
           )}
 
-          {activity.nextSteps && (
+          {activity.next_steps && (
             <div className="mb-3">
               <span className="text-sm font-medium">Next Steps: </span>
-              <span className="text-sm text-muted-foreground">{activity.nextSteps}</span>
+              <span className="text-sm text-muted-foreground">{activity.next_steps}</span>
             </div>
           )}
 
-          {activity.tags.length > 0 && (
+          {activity.tags && activity.tags.length > 0 && (
             <div className="flex flex-wrap gap-1">
               {activity.tags.map((tag) => (
                 <Badge key={tag} variant="outline" className="text-xs">
