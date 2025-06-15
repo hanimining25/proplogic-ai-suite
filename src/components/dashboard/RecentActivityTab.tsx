@@ -3,10 +3,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { FileText, Clock, TrendingUp, Users, AlertTriangle, CheckCircle, XCircle } from 'lucide-react';
-import { mockActivities } from '@/data/mockDashboardData';
 import { useQuery } from '@tanstack/react-query';
 import { getRfps } from '@/data/rfps';
 import { Skeleton } from '../ui/skeleton';
+import { getDashboardActivities } from '@/data/dashboardActivities';
+import { Activity } from '@/types/dashboard';
+import { Alert, AlertTitle, AlertDescription } from '../ui/alert';
 
 const getActivityIcon = (type: string) => {
   switch (type) {
@@ -56,6 +58,11 @@ const formatTimeAgo = (timestamp: string) => {
 };
 
 const RecentActivityTab = () => {
+  const { data: activities, isLoading: isLoadingActivities, isError: isErrorActivities, error: errorActivities } = useQuery<Activity[]>({
+    queryKey: ['dashboardActivities'],
+    queryFn: getDashboardActivities,
+  });
+
   const { data: rfps, isLoading: isLoadingRfps } = useQuery({
     queryKey: ['rfps'],
     queryFn: getRfps,
@@ -65,7 +72,7 @@ const RecentActivityTab = () => {
     .sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())
     .slice(0, 5);
 
-  const todayActivities = mockActivities.filter(activity => {
+  const todayActivities = (activities ?? []).filter(activity => {
     const activityDate = new Date(activity.timestamp);
     const today = new Date();
     return activityDate.toDateString() === today.toDateString();
@@ -102,31 +109,43 @@ const RecentActivityTab = () => {
         <Card>
           <CardHeader>
             <CardTitle>Activity Feed</CardTitle>
-            <CardDescription>Latest system and user activities (mock data)</CardDescription>
+            <CardDescription>Latest system and user activities</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              {mockActivities.map((activity) => (
-                <div key={activity.id} className="flex items-start space-x-3 p-3 rounded-lg border">
-                  <div className="flex-shrink-0 mt-1">
-                    {getActivityIcon(activity.type)}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between">
-                      <p className="text-sm font-medium">{activity.title}</p>
-                      <Badge variant={getPriorityColor(activity.priority) as any} className="text-xs">
-                        {activity.priority}
-                      </Badge>
+            {isLoadingActivities ? (
+              <div className="space-y-4">
+                  {[...Array(5)].map((_, i) => <Skeleton key={i} className="h-20 w-full" />)}
+              </div>
+            ) : isErrorActivities ? (
+              <Alert variant="destructive">
+                <AlertTriangle className="h-4 w-4" />
+                <AlertTitle>Error loading activities</AlertTitle>
+                <AlertDescription>{(errorActivities as Error)?.message}</AlertDescription>
+              </Alert>
+            ) : (
+              <div className="space-y-4">
+                {activities && activities.length > 0 ? activities.map((activity) => (
+                  <div key={activity.id} className="flex items-start space-x-3 p-3 rounded-lg border">
+                    <div className="flex-shrink-0 mt-1">
+                      {getActivityIcon(activity.type)}
                     </div>
-                    <p className="text-sm text-muted-foreground mt-1">{activity.description}</p>
-                    <div className="flex items-center justify-between mt-2">
-                      <p className="text-xs text-muted-foreground">{activity.user}</p>
-                      <p className="text-xs text-muted-foreground">{formatTimeAgo(activity.timestamp)}</p>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between">
+                        <p className="text-sm font-medium">{activity.title}</p>
+                        <Badge variant={getPriorityColor(activity.priority) as any} className="text-xs">
+                          {activity.priority}
+                        </Badge>
+                      </div>
+                      <p className="text-sm text-muted-foreground mt-1">{activity.description}</p>
+                      <div className="flex items-center justify-between mt-2">
+                        <p className="text-xs text-muted-foreground">{activity.user}</p>
+                        <p className="text-xs text-muted-foreground">{formatTimeAgo(activity.timestamp)}</p>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                )) : <p className="text-muted-foreground text-center py-10">No recent activity.</p>}
+              </div>
+            )}
             <Button variant="outline" className="w-full mt-4">
               View All Activities
             </Button>
@@ -178,24 +197,24 @@ const RecentActivityTab = () => {
       <Card>
         <CardHeader>
           <CardTitle>Today's Summary</CardTitle>
-          <CardDescription>Key activities and metrics for today (mock data)</CardDescription>
+          <CardDescription>Key activities and metrics for today</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid gap-4 md:grid-cols-4">
             <div className="text-center">
-              <div className="text-2xl font-bold text-blue-600">{todayActivities.length}</div>
+              <div className="text-2xl font-bold text-blue-600">{isLoadingActivities ? <Skeleton className="h-8 w-1/2 mx-auto" /> : todayActivities.length}</div>
               <p className="text-sm text-muted-foreground">Activities</p>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-green-600">2</div>
+              <div className="text-2xl font-bold text-green-600">{isLoadingActivities ? <Skeleton className="h-8 w-1/2 mx-auto" /> : todayActivities.filter(a => a.type === 'proposal_created').length}</div>
               <p className="text-sm text-muted-foreground">Proposals Created</p>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-yellow-600">1</div>
+              <div className="text-2xl font-bold text-yellow-600">{isLoadingActivities ? <Skeleton className="h-8 w-1/2 mx-auto" /> : todayActivities.filter(a => a.type === 'deadline_approaching').length}</div>
               <p className="text-sm text-muted-foreground">Deadlines Approaching</p>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-purple-600">3</div>
+              <div className="text-2xl font-bold text-purple-600">{isLoadingActivities ? <Skeleton className="h-8 w-1/2 mx-auto" /> : todayActivities.filter(a => a.type === 'ai_suggestion').length}</div>
               <p className="text-sm text-muted-foreground">AI Suggestions</p>
             </div>
           </div>
